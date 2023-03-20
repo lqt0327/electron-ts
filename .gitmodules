@@ -1,0 +1,3 @@
+[submodule "electron_view_ts"]
+	path = electron_view_ts
+	url = git@github.com:lqt0327/electron_view_ts.git
