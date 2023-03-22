@@ -1,6 +1,6 @@
-import {PluginBase, namedHookWithTaskFn} from '@electron-forge/plugin-base'
-import path from 'path';
-import fse from 'fs-extra';
+const {PluginBase, namedHookWithTaskFn} = require('@electron-forge/plugin-base')
+const path = require('path')
+const fse = require('fs-extra')
 const cwd = process.cwd()
 
 function iterationStep(dir) {
@@ -25,7 +25,7 @@ function iterationStep(dir) {
   return res
 }
 
-export default class BuildPlugin extends PluginBase {
+class BuildPlugin extends PluginBase {
   name = 'build';
   constructor(c) {
     super(c);
@@ -36,21 +36,26 @@ export default class BuildPlugin extends PluginBase {
   getHooks() {
     return {
       prePackage: [
-        namedHookWithTaskFn(this.prePackage, '你好')  
+        // namedHookWithTaskFn(this.prePackage, '你好')  
       ],
+
+      packageAfterCopy: (forgeConfig, ...args)=>{
+        console.log(args,'????[[[[[')
+      },
+
+      postPackage: namedHookWithTaskFn((forgeConfig, options)=>{
+        console.log('????---', options)
+      }, '你好')
     };
   }
   
-  prePackage() {
-    let out = path.join(cwd, '.webpack/renderer/main_window')
-    let target = path.join(cwd, 'electron_view_ts/build')
-    let fileList = iterationStep(target)
-    for(let v of fileList) {
-      let p = v.split('build')[1]
-      let o = path.join(out, p)
-      fse.copySync(v, o)
-    }
-    // fse.writeFileSync(pathname, '你好呀', {encoding: 'utf8'})
-    console.log('running prePackage hook----000000');
+  prePackage(buildPath) {
+    // let target = path.join(cwd, 'dist')
+    // let out = path.join(cwd, 'out/electron-ts-darwin-arm64/electron-ts.app/Contents/Resources/app')
+    // // fse.removeSync(out)
+    // fse.copySync(target, out)
+    console.log('running prePackage hook----000000', buildPath);
   }
 }
+
+module.exports = BuildPlugin

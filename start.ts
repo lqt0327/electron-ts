@@ -1,6 +1,7 @@
 const concurrently = require('concurrently')
 const path = require('path')
 const fs = require('fs')
+const logUtil = require('./util-log')
 
 const { result } = concurrently(
     [
@@ -14,30 +15,38 @@ const { result } = concurrently(
       prefix: 'name',
       killOthers: ['failure', 'success'],
       restartTries: 3,
+      prefixColors: ["greenBright"]
     }
 )
 
 result.then((res)=>{
     console.log(res,'????[[[[')
+    process.exit();
 },(err)=>{
     console.log(err,'????;;;;')
+    process.exit();
 })
 
 function preview() {
     const { result } = concurrently(
         [
             {
-                command: 'npm run preview',
-                name: 'preview',
-                cwd: path.join(__dirname, 'electron_view_ts'),
+                command: 'node webpack.config.js',
+                name: 'webpack',
             }
         ],
         {
-          prefix: 'name',
-          killOthers: ['failure', 'success'],
-          restartTries: 3,
+            prefix: 'name',
+            killOthers: ['failure', 'success'],
+            restartTries: 3,
+            prefixColors: ["cyanBright"]
         }
     )
+    result.then((res)=>{
+        process.exit();
+    },(err)=>{
+        process.exit();
+    })
 }
 
 
@@ -45,20 +54,27 @@ function start() {
     const { result } = concurrently(
         [
             {
-                command: 'electron-forge start',
+                command: 'electron .',
                 name: 'electron',
+                cwd: path.join(__dirname, 'dist'),
             }
         ],
         {
           prefix: 'name',
           killOthers: ['failure', 'success'],
           restartTries: 3,
+          prefixColors: ["yellowBright"]
         }
     )
+    result.then((res)=>{
+        process.exit();
+    },(err)=>{
+        process.exit();
+    })
 }
 
 let timer = setInterval(()=>{
-    const pathname = path.join(__dirname,'electron_view_ts/build/index.html')
+    const pathname = path.join(__dirname,'dist/view/index.html')
     try {
         const has = fs.statSync(pathname).isFile()
         console.log(`完成查询：SUCCESS`)

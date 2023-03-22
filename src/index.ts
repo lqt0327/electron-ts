@@ -5,16 +5,8 @@ import { showContextMenu } from './option';
 import DialogController from './controllers/dialog.controller';
 import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
-import { startView } from './startView'
-const cwd = process.cwd()
-// startView()
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
-  app.quit();
-}
 
 const createWindow = (): void => {
   // Create the browser window.
@@ -22,7 +14,7 @@ const createWindow = (): void => {
     height: 600,
     width: 800,
     webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: path.join(__dirname, './preload.js'),
     },
   });
   
@@ -33,7 +25,8 @@ const createWindow = (): void => {
   
   // mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
   // mainWindow.loadURL('http://localhost:8080/');
-  mainWindow.loadFile('/Users/luoqintai/Desktop/electron-ts/electron_view_ts/build/index.html');
+  // mainWindow.loadFile('/Users/luoqintai/Desktop/electron-ts/electron_view_ts/build/index.html');
+  mainWindow.loadFile(path.join(__dirname, 'view/index.html'));
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
@@ -57,7 +50,6 @@ app.whenReady().then(()=>{
 
   ipcMain.handle('getQuickLinkData', (event ,sort) => {
     let dir = path.join(__dirname,`./quickLinkData_${sort}.json`)
-    console.log(dir,'????ooooo-----=====')
     const file = new FileController()
     return file.getQuickLinkData(dir)
   })

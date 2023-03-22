@@ -2,7 +2,12 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 // preload.js
-const { contextBridge, ipcRenderer } = require('electron')
+import { contextBridge, ipcRenderer } from 'electron'
+
+window.addEventListener('click', (e) => {
+  console.log('测试数据')
+})
+
 
 /**
  * 显示鼠标右键菜单
