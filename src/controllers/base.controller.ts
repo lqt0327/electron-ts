@@ -1,4 +1,5 @@
 import { iterationStep } from '../utils/tool';
+
 class BaseController {
   constructor(){
     
@@ -8,7 +9,7 @@ class BaseController {
    * @param {*} callback 
    */
   queryAllQuickLinkData(callback: Function) {
-    const filePaths = iterationStep(__dirname)
+    const filePaths = iterationStep(QUICK_LINK_DATA_PATH)
     for(let pathname of filePaths) {
       if(pathname.match(/quickLinkData_(.)*\.json/)) {
         callback(pathname)

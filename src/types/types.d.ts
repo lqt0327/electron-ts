@@ -1,3 +1,5 @@
+declare const QUICK_LINK_DATA_PATH: string;
+
 interface QuickLinkData {
   [key: string]: {
     [key: string]: QuickLinkDataItem

@@ -1,15 +1,14 @@
 import fs from 'fs'
 import path from 'path'
-import BaseController from './base.controller'
-const cwd = process.cwd()
-class DataController extends BaseController {
-  constructor(private readonly id?: string) {
-    super()
-  }
+import { QueryAllQuickLinkData } from './decorator'
 
+class DataController {
+  constructor(private readonly id?: string) { }
+
+  @QueryAllQuickLinkData()
   updateQuickLinkData(newData: QuickLinkDataItem) {
     const self = this
-    return this.queryAllQuickLinkData((pathname: string)=>{
+    return (pathname: string)=>{
       const content = JSON.parse(fs.readFileSync(pathname,{encoding: 'utf8'}))
       let keys = Object.keys(content)
       for(let v of keys) {
@@ -19,12 +18,13 @@ class DataController extends BaseController {
         }
       }
       fs.writeFileSync(pathname, JSON.stringify(content), {encoding: 'utf8'})
-    })
+    }
   }
 
+  @QueryAllQuickLinkData()
   deleteQuickLinkData() {
     const self = this
-    return this.queryAllQuickLinkData((pathname: string)=>{
+    return (pathname: string)=>{
       const content = JSON.parse(fs.readFileSync(pathname,{encoding: 'utf8'}))
       let keys = Object.keys(content)
       for(let v of keys) {
@@ -34,7 +34,7 @@ class DataController extends BaseController {
         }
       }
       fs.writeFileSync(pathname, JSON.stringify(content), {encoding: 'utf8'})
-    })
+    }
   }
 
   /**
@@ -45,7 +45,7 @@ class DataController extends BaseController {
    */
   searchQuickLinkData(keywords: string) {
     let result = []
-    const file = path.join(__dirname, 'quickLinkData_default.json')
+    const file = path.join(QUICK_LINK_DATA_PATH, 'quickLinkData_default.json')
     if(fs.statSync(file).isFile()) {
       const content = JSON.parse(fs.readFileSync(file,{encoding: 'utf8'}))
       const keys = Object.keys(content.default)

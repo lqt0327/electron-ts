@@ -9,7 +9,6 @@
     "esModuleInterop" : true,
     "moduleResolution":"node",
     "target": "ES2015",
-    "allowJs": true,
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",

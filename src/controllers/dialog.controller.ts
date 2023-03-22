@@ -56,8 +56,6 @@ class DialogController {
     const filePaths = iterationStep(pathname)
     const selfFiles = []
 
-    console.log(filePaths,'?????你好回家都发')
-
     for(let item of filePaths) {
       let type = await fileTypeFromFile(item)
       if(type?.mime?.includes(selfFileType) || type?.ext === selfFileType) {

@@ -3,6 +3,7 @@ const path = require('path')
 const logUtil = require('./util-log')
 const gulpFunc = require('./gulpfile')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const global = require('./global')
 const cwd = process.cwd()
 
 const finalWebpackConfig = {
@@ -46,6 +47,7 @@ const finalWebpackConfig = {
           {
             loader: "ts-loader",
             options: {
+              configFile: path.join(cwd, 'tsconfig.json'),
               transpileOnly: true,
             }
           }
@@ -56,6 +58,10 @@ const finalWebpackConfig = {
   plugins: [
     new ForkTsCheckerWebpackPlugin({
       typescript: {configFile: path.join(cwd, 'tsconfig.json')}
+    }),
+    new webpack.DefinePlugin({
+      QUICK_LINK_DATA_PATH: JSON.stringify(global.QUICK_LINK_DATA_PATH),
+      BOOLEAN: "true"
     })
   ]
 }

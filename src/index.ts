@@ -17,7 +17,6 @@ const createWindow = (): void => {
       preload: path.join(__dirname, './preload.js'),
     },
   });
-  
 
   ipcMain.on('show-context-menu', (event) => showContextMenu(event, mainWindow))
 
@@ -41,7 +40,6 @@ app.whenReady().then(()=>{
   ipcMain.handle('dialog:openFile', async (event ,selfFileType) => {
     const dialog = new DialogController(['multiSelections', 'openDirectory'])
     let fileList = await dialog.formatOpenFileData(selfFileType)
-    console.log(fileList,'??Zzz')
     const file = new FileController()
     file.createQuickLinkMap(fileList.title)
     file.createQuickLinkMap(fileList.time, 'time')
@@ -49,7 +47,7 @@ app.whenReady().then(()=>{
   })
 
   ipcMain.handle('getQuickLinkData', (event ,sort) => {
-    let dir = path.join(__dirname,`./quickLinkData_${sort}.json`)
+    let dir = path.join(QUICK_LINK_DATA_PATH,`./quickLinkData_${sort}.json`)
     const file = new FileController()
     return file.getQuickLinkData(dir)
   })
