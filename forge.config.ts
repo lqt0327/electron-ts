@@ -7,20 +7,23 @@ import { WebpackPlugin } from '@electron-forge/plugin-webpack';
 
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
+import path from 'path';
+import BuildPlugin from './plugins/buildPlugin'
 
 const config: ForgeConfig = {
   packagerConfig: {},
   rebuildConfig: {},
   makers: [new MakerSquirrel({}), new MakerZIP({}, ['darwin']), new MakerRpm({}), new MakerDeb({})],
   plugins: [
+    
     new WebpackPlugin({
       mainConfig,
       renderer: {
-        config: rendererConfig,
+        config: rendererConfig, 
         entryPoints: [
           {
-            html: './src/index.html',
-            js: './src/renderer.ts',
+            html: path.join(__dirname, 'electron_view_ts/build/index.html'),
+            js: path.join(__dirname, 'electron_view_ts/build/assets/index.js'),
             name: 'main_window',
             preload: {
               js: './src/preload.ts',
@@ -28,6 +31,9 @@ const config: ForgeConfig = {
           },
         ],
       },
+    }),
+    new BuildPlugin({
+      
     }),
   ],
 };
