@@ -93,8 +93,5 @@ gulpFunc(()=>{
     }
   
     logUtil.pass("Compilication done.")
-  
-    // logUtil.scaffold('[0] http://h5.dev.weidian.com:3023/pages')
-    // logUtil.scaffold('建议将 localhost 绑定到域名 h5.dev.weidian.com, 防止接口请求时出现跨域问题\n')
   })
 })
