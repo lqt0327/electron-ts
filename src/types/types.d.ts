@@ -19,6 +19,7 @@ interface QuickLinkDataItem {
 
 interface FileMessage {
   path: string,
+  fName: string,
   cTime: Date,
   mTime: Date
 }
@@ -36,11 +37,7 @@ declare namespace ResponseParam {
 
   interface getOneFileMessage {
     status: status;
-    result?: {
-      path: string,
-      cTime: Date,
-      mTime: Date
-    }
+    result?: FileMessage
   }
 
   interface getMoreFileMessage {

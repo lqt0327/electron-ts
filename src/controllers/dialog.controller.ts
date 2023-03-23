@@ -2,6 +2,7 @@ import { dialog } from 'electron';
 import {fileTypeFromFile} from 'file-type';
 import { iterationStep, encodeByBase64 } from '../utils/tool';
 import fs from 'fs';
+import path from 'path'
 
 function formatTime(time: Date) {
   try {
@@ -30,6 +31,7 @@ class DialogController {
         },
         result: {
           path: pathname,
+          fName: path.basename(pathname),
           cTime: fs.statSync(pathname).ctime,
           mTime: fs.statSync(pathname).mtime
         }
@@ -61,6 +63,7 @@ class DialogController {
       if(type?.mime?.includes(selfFileType) || type?.ext === selfFileType) {
         selfFiles.push({
           path: item,
+          fName: path.basename(pathname),
           cTime: fs.statSync(item).ctime,
           mTime: fs.statSync(item).mtime
         })
@@ -109,21 +112,21 @@ class DialogController {
     
     // TODO: 暂时默认 fileList 为数组类型，一定执行 getMoreFileMessage 函数
     for(let item of fileList as Array<FileMessage>) {
-      let title = ''
-      if(process.platform === 'win32') {
-        title = item.path.split('\\').pop()
-      }
-      else if(process.platform === 'darwin') {
-        title = item.path.split('/').pop()
-      }
-      let key = `llscw_${encodeByBase64(title)}`
+      // let title = ''
+      // if(process.platform === 'win32') {
+      //   title = item.path.split('\\').pop()
+      // }
+      // else if(process.platform === 'darwin') {
+      //   title = item.path.split('/').pop()
+      // }
+      let key = `llscw_${encodeByBase64(item.fName)}`
       let time = formatTime(item.cTime) 
 
       // TODO: 收藏功能 需要增加字段标识属于哪种分类 可能属于多个分类，需要是数组类型
 
       map_title.default[key] = {
         id: key,
-        title: title,
+        title: item.fName,
         img: item.path,
         factory: '测试数据',
         createTime: time,
@@ -135,7 +138,7 @@ class DialogController {
       if(map_time[time]) {
         map_time[time][key] = {
           id: key,
-          title: title,
+          title: item.fName,
           img: item.path,
           factory: '测试数据',
           createTime: time,
@@ -147,7 +150,7 @@ class DialogController {
         map_time[time] = {
           [key]: {
             id: key,
-            title: title,
+            title: item.fName,
             img: item.path,
             factory: '测试数据',
             createTime: time,

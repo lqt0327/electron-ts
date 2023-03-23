@@ -1,5 +1,8 @@
 import { iterationStep } from '../utils/tool';
 
+/**
+ * 遍历目录下的 quickLinkData_xxx.json 文件
+ */
 function QueryAllQuickLinkData() {
   return function decorator(target, name, descriptor) {
     const func = descriptor.value

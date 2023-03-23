@@ -21,5 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const _newData = JSON.parse(newData)
     return ipcRenderer.invoke('updateQuickLinkData', id, _newData)
   },
-  searchQuickLinkData: (keywords: string) => ipcRenderer.invoke('searchQuickLinkData', keywords)
+  searchQuickLinkData: (keywords: string) => ipcRenderer.invoke('searchQuickLinkData', keywords),
+  selectImage: () => ipcRenderer.invoke('dialog:selectImage'),
+  getFileName: (pathname: string) => ipcRenderer.invoke('file:getName', pathname)
 })

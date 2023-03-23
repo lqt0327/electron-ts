@@ -61,10 +61,10 @@ const finalWebpackConfig = {
     }),
     new webpack.DefinePlugin({
       QUICK_LINK_DATA_PATH: JSON.stringify(global.QUICK_LINK_DATA_PATH),
-      BOOLEAN: "true"
     })
   ]
 }
+
 gulpFunc(()=>{
   webpack(finalWebpackConfig, async (err, stats) => {
     if (err) {

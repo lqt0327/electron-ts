@@ -42,8 +42,14 @@ app.whenReady().then(()=>{
     let fileList = await dialog.formatOpenFileData(selfFileType)
     const file = new FileController()
     file.createQuickLinkMap(fileList.title)
-    file.createQuickLinkMap(fileList.time, 'time')
+    file.createQuickLinkMap(fileList.time, 'time') 
     return fileList
+  })
+
+  ipcMain.handle('dialog:selectImage', async ()=>{
+    const dialog = new DialogController(['multiSelections', 'openFile'])
+    let file = await dialog.handleFileOpen('image')
+    return file
   })
 
   ipcMain.handle('getQuickLinkData', (event ,sort) => {
@@ -96,6 +102,8 @@ app.whenReady().then(()=>{
     //   }
     // })
   })
+
+  ipcMain.handle('file:getName', (event, pathname)=>path.basename(pathname))
 
   createWindow()
 

@@ -20,10 +20,8 @@ const { result } = concurrently(
 )
 
 result.then((res)=>{
-    console.log(res,'????[[[[')
     process.exit();
 },(err)=>{
-    console.log(err,'????;;;;')
     process.exit();
 })
 
