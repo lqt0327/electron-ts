@@ -3,21 +3,23 @@ import { Menu, BrowserWindow, MenuItemConstructorOptions, MenuItem, PopupOptions
 /**
  * 鼠标右键菜单栏
  * @param {*} event 
- * @param {*} win 
+ * {https://www.electronjs.org/zh/docs/latest/api/structures/ipc-main-event
+ *  sender 网络会议 - 返回发送消息的 webContents
+ * }
  */
-function showContextMenu(event: Electron.IpcMainEvent, win: BrowserWindow) {
+function showContextMenu(event: Electron.IpcMainEvent) {
   const template: (MenuItemConstructorOptions | MenuItem)[] = [
     {
       label: '重新加载',
       click: () => {
-        win.reload()
+        event.sender.reload()
       }
     },
     {
       label: '返回',
       click: () => {
-        if(win.webContents.canGoBack()) {
-          win.webContents.goBack()
+        if(event.sender.canGoBack()) {
+          event.sender.goBack()
         }
       }
     },

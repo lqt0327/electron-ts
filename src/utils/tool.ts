@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * 遍历目录--递归
@@ -57,9 +58,15 @@ function decodeByBase64(str: string) {
     return Buffer.from(str,'base64').toString()
 }
 
+function encodeById(str: string) {
+    // return `llscw_${encodeByBase64(str)}`
+    return `llscw_${uuidv4()}`
+}
+
 export {
     travel,
     iterationStep,
     encodeByBase64,
-    decodeByBase64
+    decodeByBase64,
+    encodeById
 }

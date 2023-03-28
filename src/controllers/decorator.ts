@@ -1,4 +1,5 @@
 import { iterationStep } from '../utils/tool';
+import FileController from './file.controller';
 
 /**
  * 遍历目录下的 quickLinkData_xxx.json 文件
@@ -9,10 +10,13 @@ function QueryAllQuickLinkData() {
     if(typeof func === 'function') {
       descriptor.value = function(...args) {
         const filePaths = iterationStep(QUICK_LINK_DATA_PATH)
+        const file = new FileController()
+        file.initQuickLinkDatabase()
         for(let pathname of filePaths) {
-          if(pathname.match(/quickLinkData_(.)*\.json/)) {
+          const s = pathname.match(/quickLinkData_((.)*)\.json/)
+          if(s) {
             const callback = func.apply(this, args)
-            callback(pathname)
+            callback(pathname, s[1])
           }
         }
         return

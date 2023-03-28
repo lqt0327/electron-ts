@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import merge_lodash from 'lodash/merge';
+import fse from 'fs-extra'
 
 class FileController {
   constructor() {
@@ -53,6 +54,20 @@ class FileController {
       fs.writeFileSync(dir, JSON.stringify(merge_lodash(quickLinkData, data)), {encoding: 'utf8'})
       return true
     }catch(err) {
+      return false
+    }
+  }
+
+  initQuickLinkDatabase() {
+    const list = ['default', 'time']
+    try {
+      for(let v of list) {
+        let dir = path.join(QUICK_LINK_DATA_PATH, `quickLinkData_${v}.json`)
+        fse.ensureFileSync(dir)
+      }
+      return true
+    }catch(err) {
+      console.error('初始化数据存储文件异常: ', err)
       return false
     }
   }

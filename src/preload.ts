@@ -14,7 +14,7 @@ window.addEventListener('contextmenu', (e) => {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openFile: (selfFileType: string) => ipcRenderer.invoke('dialog:openFile', selfFileType),
-  openEXE: (link: string) => ipcRenderer.send('open-exe', link),
+  openApp: (link: string) => ipcRenderer.invoke('open-app', link),
   getQuickLinkData: (sort: string) => ipcRenderer.invoke('getQuickLinkData', sort),
   deleteQuickLinkData: (id: string) => ipcRenderer.invoke('deleteQuickLinkData', id),
   updateQuickLinkData: (id: string, newData: string) => {
@@ -23,5 +23,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   searchQuickLinkData: (keywords: string) => ipcRenderer.invoke('searchQuickLinkData', keywords),
   selectImage: () => ipcRenderer.invoke('dialog:selectImage'),
-  getFileName: (pathname: string) => ipcRenderer.invoke('file:getName', pathname)
+  selectFile: () => ipcRenderer.invoke('dialog:selectFile'),
+  getFileName: (pathname: string) => ipcRenderer.invoke('file:getName', pathname),
+  encodeById: (id: string) => ipcRenderer.invoke('tools:encodeById', id),
+  addQuickLinkData: (newData: string) => {
+    const _newData = JSON.parse(newData)
+    return ipcRenderer.invoke('addQuickLinkData', _newData)
+  },
 })

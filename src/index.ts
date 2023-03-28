@@ -1,15 +1,12 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
-import child_process from 'child_process'
 import { showContextMenu } from './option';
 import DialogController from './controllers/dialog.controller';
 import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
-
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+import { encodeById } from './utils/tool'
 
 const createWindow = (): void => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
@@ -18,23 +15,13 @@ const createWindow = (): void => {
     },
   });
 
-  ipcMain.on('show-context-menu', (event) => showContextMenu(event, mainWindow))
+  ipcMain.on('show-context-menu', (event) => showContextMenu(event))
 
-  // and load the index.html of the app.
-  
-  // mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  // mainWindow.loadURL('http://localhost:8080/');
-  // mainWindow.loadFile('/Users/luoqintai/Desktop/electron-ts/electron_view_ts/build/index.html');
   mainWindow.loadFile(path.join(__dirname, 'view/index.html'));
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 };
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-// app.on('ready', createWindow);
 
 app.whenReady().then(()=>{
   ipcMain.handle('dialog:openFile', async (event ,selfFileType) => {
@@ -48,7 +35,13 @@ app.whenReady().then(()=>{
 
   ipcMain.handle('dialog:selectImage', async ()=>{
     const dialog = new DialogController(['multiSelections', 'openFile'])
-    let file = await dialog.handleFileOpen('image')
+    let file = await dialog.handleFileOpen('image', 'file')
+    return file
+  })
+
+  ipcMain.handle('dialog:selectFile', async ()=>{
+    const dialog = new DialogController(['multiSelections', 'openFile'])
+    let file = await dialog.handleFileOpen('all', 'file')
     return file
   })
 
@@ -59,11 +52,6 @@ app.whenReady().then(()=>{
   })
 
   ipcMain.handle('deleteQuickLinkData', (event, id)=>{
-    // TODO: 遍历目录下的 quickLinkData_xxx.json 文件，删除其中对应的数据
-    // 传递对应索引，根据索引进行哈希匹配，再对匹配到的数组进行遍历，删除对应数据？？？
-    // 存在问题，不适合默认表，默认表会把整个表的数据都遍历一遍，性能不行
-    // 异步完成？渲染层先隐藏掉对应数据，后台异步删除对应表中数据？
-    // 采用：循环遍历删除对应表中数据方案，删除可以异步进行，
     const data = new DataController(id)
     return data.deleteQuickLinkData()
   })
@@ -73,34 +61,23 @@ app.whenReady().then(()=>{
     return data.updateQuickLinkData(newData)
   })
 
+  ipcMain.handle('addQuickLinkData', (event, newData)=>{
+    // TODO: 需要透出id加密方法到渲染层，在渲染层对newData进行数据处理
+    const data = new DataController()
+    return data.addQuickLinkData(newData)
+  })
+
   ipcMain.handle('searchQuickLinkData', (event, keywords)=>{
     const data = new DataController()
     return data.searchQuickLinkData(keywords)
   })
 
-  ipcMain.on('open-exe', async (event, link)=>{
-    if (process.platform !== 'win32') return false
-    
-    child_process.exec(`"${link}"`, (err)=>{
-      if(err) {
-        console.log('程序启动出错：', err)
-      }
-    })
+  ipcMain.handle('tools:encodeById', (event, id)=>{
+    return encodeById(id)
+  }) 
 
-    // { ext: 'exe', mime: 'application/x-msdownload' }
-    // let list = await handleFileOpen('exe')
-    // console.log('你好呀----0000')
-    // list.forEach(item=>{
-    //   console.log(item, '???<<<<')
-    //   /**TODO: 多个exe程序，优先匹配关键词，无法分辨，给出对应程序路径选择弹窗（弹窗应该可以主动唤起） */
-    //   if(item.includes('_cn')) {
-    //     child_process.exec(`"${item}"`, (err)=>{
-    //       if(err) {
-    //         console.log(err,'kkkkk')
-    //       }
-    //     })
-    //   }
-    // })
+  ipcMain.handle('open-app', async (event, link)=>{
+    return shell.openPath(link)
   })
 
   ipcMain.handle('file:getName', (event, pathname)=>path.basename(pathname))
@@ -110,7 +87,9 @@ app.whenReady().then(()=>{
   app.on('activate', () => {
     // 在 macOS 系统内, 如果没有已开启的应用窗口
     // 点击托盘图标时通常会重新创建一个新窗口
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+    }
   })
 })
 
