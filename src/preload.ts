@@ -1,7 +1,3 @@
-// See the Electron documentation for details on how to use preload scripts:
-// https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-
-// preload.js
 import { contextBridge, ipcRenderer } from 'electron'
 
 /**
@@ -15,19 +11,25 @@ window.addEventListener('contextmenu', (e) => {
 contextBridge.exposeInMainWorld('electronAPI', {
   openFile: (selfFileType: string) => ipcRenderer.invoke('dialog:openFile', selfFileType),
   openApp: (link: string) => ipcRenderer.invoke('open-app', link),
-  getQuickLinkData: (sort: string) => ipcRenderer.invoke('getQuickLinkData', sort),
-  deleteQuickLinkData: (id: string) => ipcRenderer.invoke('deleteQuickLinkData', id),
+  getQuickLinkData: (sort: string) => ipcRenderer.invoke('action:getQuickLinkData', sort),
+  deleteQuickLinkData: (id: string) => ipcRenderer.invoke('action:deleteQuickLinkData', id),
   updateQuickLinkData: (id: string, newData: string) => {
     const _newData = JSON.parse(newData)
-    return ipcRenderer.invoke('updateQuickLinkData', id, _newData)
+    return ipcRenderer.invoke('action:updateQuickLinkData', id, _newData)
   },
-  searchQuickLinkData: (keywords: string) => ipcRenderer.invoke('searchQuickLinkData', keywords),
+  collect: (newData: string) => {
+    const _newData = JSON.parse(newData)
+    return ipcRenderer.invoke('action:collect', _newData)
+  },
+  searchQuickLinkData: (keywords: string) => ipcRenderer.invoke('action:searchQuickLinkData', keywords),
   selectImage: () => ipcRenderer.invoke('dialog:selectImage'),
   selectFile: () => ipcRenderer.invoke('dialog:selectFile'),
-  getFileName: (pathname: string) => ipcRenderer.invoke('file:getName', pathname),
+  autoWriteListData: () => ipcRenderer.invoke('dialog:autoWriteListData'),
+  pathBasename: (pathname: string, ext?: string) => ipcRenderer.invoke('tools:pathBasename', pathname, ext),
   encodeById: (id: string) => ipcRenderer.invoke('tools:encodeById', id),
+  pathJoin: (...target: string[]) => ipcRenderer.invoke('tools:pathJoin', ...target),
   addQuickLinkData: (newData: string) => {
     const _newData = JSON.parse(newData)
-    return ipcRenderer.invoke('addQuickLinkData', _newData)
+    return ipcRenderer.invoke('action:addQuickLinkData', _newData)
   },
 })

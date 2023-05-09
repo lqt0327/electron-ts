@@ -11,7 +11,7 @@ interface QuickLinkDataItem {
   title: string;
   img: string;
   factory: string;
-  createTime: number;
+  createTime: string;
   banner: string;
   about: string;
   startLink: string;
@@ -43,6 +43,11 @@ declare namespace ResponseParam {
   interface getMoreFileMessage {
     status: status;
     result?: Array<FileMessage>
+  }
+
+  interface getDirMessage {
+    status: status;
+    result: string;
   }
 }
 

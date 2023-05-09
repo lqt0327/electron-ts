@@ -4,7 +4,8 @@ import { showContextMenu } from './option';
 import DialogController from './controllers/dialog.controller';
 import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
-import { encodeById } from './utils/tool'
+import { encodeById, pathJoin, pathBasename } from './utils/tool';
+import fse from 'fs-extra'
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
@@ -45,42 +46,83 @@ app.whenReady().then(()=>{
     return file
   })
 
-  ipcMain.handle('getQuickLinkData', (event ,sort) => {
+  ipcMain.handle('dialog:autoWriteListData', async ()=>{
+    const dialog = new DialogController(['multiSelections', 'openDirectory'])
+    const data = new DataController()
+    const { result, status } = await dialog.handleDirOpen()
+    // 直接改写data.json 中图片的路径
+    if(fse.statSync(path.join(result, '/data.json')).isFile()) {
+      const obj = fse.readJSONSync(path.join(result, '/data.json'))
+      for(let v of obj) {
+        v.img = path.join(result, '/images', path.basename(v.img))
+        v.banner = path.join(result, '/images', path.basename(v.banner))
+        data.addQuickLinkData(v)
+      }
+    }
+    return {
+      status: {
+        code: 0
+      },
+      result,
+    }
+  })
+
+  ipcMain.handle('action:getQuickLinkData', (event ,sort) => {
     let dir = path.join(QUICK_LINK_DATA_PATH,`./quickLinkData_${sort}.json`)
     const file = new FileController()
     return file.getQuickLinkData(dir)
   })
 
-  ipcMain.handle('deleteQuickLinkData', (event, id)=>{
+  ipcMain.handle('action:deleteQuickLinkData', (event, id)=>{
     const data = new DataController(id)
     return data.deleteQuickLinkData()
   })
 
-  ipcMain.handle('updateQuickLinkData', (event, id, newData)=>{
+  ipcMain.handle('action:updateQuickLinkData', (event, id, newData)=>{
     const data = new DataController(id)
     return data.updateQuickLinkData(newData)
   })
 
-  ipcMain.handle('addQuickLinkData', (event, newData)=>{
+  ipcMain.handle('action:addQuickLinkData', (event, newData)=>{
     // TODO: 需要透出id加密方法到渲染层，在渲染层对newData进行数据处理
     const data = new DataController()
     return data.addQuickLinkData(newData)
   })
 
-  ipcMain.handle('searchQuickLinkData', (event, keywords)=>{
+  ipcMain.handle('action:searchQuickLinkData', (event, keywords)=>{
     const data = new DataController()
     return data.searchQuickLinkData(keywords)
   })
 
+  /**
+   * 工具：加密，生成唯一id
+   */
   ipcMain.handle('tools:encodeById', (event, id)=>{
     return encodeById(id)
   }) 
 
-  ipcMain.handle('open-app', async (event, link)=>{
+  ipcMain.handle('tools:pathJoin', (event, ...target) => {
+    return pathJoin(...target)
+  })
+
+  ipcMain.handle('tools:pathBasename', (event, pathname, ext?: string)=>{
+    return pathBasename(pathname, ext)
+  })
+
+  /**
+   * 打开本地程序or文件
+   */
+  ipcMain.handle('action:open-app', async (event, link)=>{
     return shell.openPath(link)
   })
 
-  ipcMain.handle('file:getName', (event, pathname)=>path.basename(pathname))
+  /**
+   * 操作：收藏卡片
+   */
+  ipcMain.handle('action:collect', (event, newData) => {
+    const data = new DataController()
+    return data.collectQuickLinkData(newData)
+  })
 
   createWindow()
 

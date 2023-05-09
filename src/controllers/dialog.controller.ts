@@ -93,18 +93,34 @@ class DialogController {
   }
 
   /**
+   * 
+   * @param {*} pathname 
+   * @param {string} selfFileType -文件类型  exe ｜ image
+   * @returns 
+   */
+  async #getDirMessage(pathname: string): Promise<ResponseParam.getDirMessage> {
+    return {
+      status: {
+        code: 0
+      },
+      result: pathname
+    }
+  }
+
+  /**
    * 唤起系统文件选择弹窗
    * @param selfFileType -文件类型
    * @param type -文件or目录 file | dir
    * @returns 
    */
-  async handleFileOpen(selfFileType:string, type: string): Promise<ResponseParam.getMoreFileMessage | ResponseParam.getOneFileMessage> {
+  async handleFileOpen(selfFileType:string, type: string): Promise<ResponseParam.getMoreFileMessage | ResponseParam.getOneFileMessage | ResponseParam.getDirMessage> {
     let { filePaths: dir, canceled } = await dialog.showOpenDialog({ properties: this.properties})
     const pathname = dir[0]
     if(type === 'file') {
       return this.#getOneFileMessage(pathname, selfFileType)
     }else if (type === 'dir') {
       return this.#getMoreFileMessage(pathname, selfFileType)
+      // return this.#getDirMessage(pathname, selfFileType)
     }
     return {
       status: {
@@ -112,6 +128,18 @@ class DialogController {
       },
       result: null
     }
+  }
+
+  /**
+   * 唤起系统目录选择弹窗
+   * @param selfFileType -文件类型
+   * @param type -文件or目录 file | dir
+   * @returns 
+   */
+  async handleDirOpen(): Promise<ResponseParam.getDirMessage> {
+    let { filePaths: dir, canceled } = await dialog.showOpenDialog({ properties: this.properties})
+    const pathname = dir[0]
+    return this.#getDirMessage(pathname)
   }
 
   /**
@@ -134,7 +162,7 @@ class DialogController {
     // TODO: 暂时默认 fileList 为数组类型，一定执行 getMoreFileMessage 函数
     for(let item of fileList as Array<FileMessage>) {
       let key = encodeById(item.fName)
-      let time = formatTime(item.cTime) 
+      let time = formatTime(item.cTime).toString()
 
       const dir = path.dirname(item.path)
       const img = path.join(dir, 'llscw_img.png')

@@ -63,10 +63,20 @@ function encodeById(str: string) {
     return `llscw_${uuidv4()}`
 }
 
+function pathJoin(...args: string[]) {
+    return path.join(...args)
+}
+
+function pathBasename(o: string, ext?: string) {
+    return path.basename(o, ext)
+}
+
 export {
     travel,
     iterationStep,
     encodeByBase64,
     decodeByBase64,
-    encodeById
+    encodeById,
+    pathJoin,
+    pathBasename
 }

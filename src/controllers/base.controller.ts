@@ -1,4 +1,5 @@
 import { iterationStep } from '../utils/tool';
+import { validateConfig } from './decorator'
 
 class BaseController {
   constructor(){
@@ -8,11 +9,13 @@ class BaseController {
    * 遍历目录下的 quickLinkData_xxx.json 文件
    * @param {*} callback 
    */
+  @validateConfig()
   queryAllQuickLinkData(callback: Function) {
     const filePaths = iterationStep(QUICK_LINK_DATA_PATH)
     for(let pathname of filePaths) {
-      if(pathname.match(/quickLinkData_(.)*\.json/)) {
-        callback(pathname)
+      const s = pathname.match(/quickLinkData_((.)*)\.json/)
+      if(s) {
+        callback(pathname, s[1])
       }
     }
   }

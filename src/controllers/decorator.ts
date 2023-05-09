@@ -26,6 +26,27 @@ function QueryAllQuickLinkData() {
   }
 }
 
+function validateConfig() {
+  return function decorator(target, name, descriptor) {
+    const func = descriptor.value
+    if(typeof func === 'function') {
+      descriptor.value = function(...args) {
+        const filePaths = iterationStep(QUICK_LINK_DATA_PATH)
+        const file = new FileController()
+        const flag = file.initQuickLinkDatabase()
+        if(flag) {
+          func.apply(this, args)
+        }else {
+          file.initQuickLinkDatabase()
+          func.apply(this, args)
+        }
+      }
+    }
+    return descriptor
+  }
+}
+
 export {
-  QueryAllQuickLinkData
+  QueryAllQuickLinkData,
+  validateConfig
 }

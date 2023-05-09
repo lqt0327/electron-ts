@@ -59,7 +59,7 @@ class FileController {
   }
 
   initQuickLinkDatabase() {
-    const list = ['default', 'time']
+    const list = ['default', 'time', 'collect']
     try {
       for(let v of list) {
         let dir = path.join(QUICK_LINK_DATA_PATH, `quickLinkData_${v}.json`)
