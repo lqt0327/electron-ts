@@ -9,8 +9,8 @@ import fse from 'fs-extra'
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    height: 800,
+    width: 1200,
     webPreferences: {
       preload: path.join(__dirname, './preload.js'),
     },
@@ -92,6 +92,11 @@ app.whenReady().then(()=>{
   ipcMain.handle('action:searchQuickLinkData', (event, keywords)=>{
     const data = new DataController()
     return data.searchQuickLinkData(keywords)
+  })
+
+  ipcMain.handle('action:cancelCollect', (event, id)=>{
+    const data = new DataController(id)
+    return data.cancelCollect()
   })
 
   /**

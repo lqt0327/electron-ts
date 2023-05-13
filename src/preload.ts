@@ -10,9 +10,10 @@ window.addEventListener('contextmenu', (e) => {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   openFile: (selfFileType: string) => ipcRenderer.invoke('dialog:openFile', selfFileType),
-  openApp: (link: string) => ipcRenderer.invoke('open-app', link),
+  openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
   getQuickLinkData: (sort: string) => ipcRenderer.invoke('action:getQuickLinkData', sort),
   deleteQuickLinkData: (id: string) => ipcRenderer.invoke('action:deleteQuickLinkData', id),
+  cancelCollect: (id: string) => ipcRenderer.invoke('action:cancelCollect', id),
   updateQuickLinkData: (id: string, newData: string) => {
     const _newData = JSON.parse(newData)
     return ipcRenderer.invoke('action:updateQuickLinkData', id, _newData)

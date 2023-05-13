@@ -15,6 +15,10 @@ interface QuickLinkDataItem {
   banner: string;
   about: string;
   startLink: string;
+  src: string;
+  tags: string[];
+  title_cn: string;
+  collect: number
 }
 
 interface FileMessage {
@@ -28,6 +32,12 @@ interface OptionData {
   default: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; 
   time: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; 
   collect: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData;
+}
+
+interface OptionCollect {
+  default: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData; 
+  time: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData; 
+  collect: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData;
 }
 
 declare namespace ResponseParam {

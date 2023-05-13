@@ -9,6 +9,31 @@ class DataController extends BaseController {
     'time': (content, newData) => this.#timeData(content, newData),
     'collect': (content, newData) => this.#collectData(content, newData)
   }
+
+  #option_collect: OptionCollect = {
+    'default': (content, collect, newData) => {
+      const id = newData.id
+      if(content.default[id]) {
+        content.default[id].collect = collect
+      }
+      return content
+    },
+    'time': (content, collect, newData) => {
+      const date = new Date(newData.createTime).getFullYear()
+      const id = newData.id
+      if(content[date] && content[date][id]) {
+        content[date][id].collect = collect
+      }
+      return content
+    },
+    'collect': (content, collect, newData) => {
+      const id = newData.id
+      if(content.default[id]) {
+        content.default[id].collect = collect
+      }
+      return content
+    },
+  }
   
   constructor(private readonly id?: string) { 
     super()
@@ -167,6 +192,13 @@ class DataController extends BaseController {
     const dir = path.join(QUICK_LINK_DATA_PATH, 'quickLinkData_collect.json')
     fse.ensureFileSync(dir)
     this.#collect(newData, dir, 'collect')
+    this.queryAllQuickLinkData((pathname: string, type: string)=>{
+      let content = fse.readJSONSync(pathname)
+      if(this.#option_collect[type] && typeof this.#option_collect[type] === 'function') {
+        content = this.#option_collect[type](content, 1, newData)
+      }
+      fse.writeJSONSync(pathname, content)
+    })
   }
 
   /**
@@ -176,6 +208,30 @@ class DataController extends BaseController {
     const self = this
     this.queryAllQuickLinkData((pathname: string)=> {
       this.#delete(pathname, self.id)
+    })
+  }
+
+  /**
+   * 公共方法：取消收藏
+   */
+  cancelCollect() {
+    const file = path.join(QUICK_LINK_DATA_PATH, 'quickLinkData_collect.json')
+    let newData = {}
+    if(fs.statSync(file).isFile()) {
+      const content = fse.readJSONSync(file)
+      if(content.default[this.id]) {
+        newData = content.default[this.id]
+        delete content.default[this.id]
+      }
+      fse.writeJSONSync(file, content)
+    }
+
+    this.queryAllQuickLinkData((pathname: string, type: string)=>{
+      let content = fse.readJSONSync(pathname)
+      if(this.#option_collect[type] && typeof this.#option_collect[type] === 'function') {
+        content = this.#option_collect[type](content, 0, newData)
+      }
+      fse.writeJSONSync(pathname, content)
     })
   }
 
@@ -192,7 +248,8 @@ class DataController extends BaseController {
       const content = JSON.parse(fs.readFileSync(file,{encoding: 'utf8'}))
       const keys = Object.keys(content.default)
       for(let v of keys) {
-        if(content['default'][v].title.includes(keywords)) {
+        let reg = new RegExp(keywords, "i")
+        if(reg.test(content['default'][v].title_cn)) {
           result.push(v)
         }
       }

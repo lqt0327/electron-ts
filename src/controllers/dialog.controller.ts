@@ -115,6 +115,14 @@ class DialogController {
    */
   async handleFileOpen(selfFileType:string, type: string): Promise<ResponseParam.getMoreFileMessage | ResponseParam.getOneFileMessage | ResponseParam.getDirMessage> {
     let { filePaths: dir, canceled } = await dialog.showOpenDialog({ properties: this.properties})
+    if(canceled) {
+      return {
+        status: {
+          code: 0,
+        },
+        result: null
+      }
+    }
     const pathname = dir[0]
     if(type === 'file') {
       return this.#getOneFileMessage(pathname, selfFileType)
@@ -178,7 +186,11 @@ class DialogController {
         createTime: time,
         banner: banner,
         about: '待定',
-        startLink: item.path
+        startLink: item.path,
+        src: '',
+        tags: [''],
+        title_cn: '',
+        collect: 0
       }
 
       if(map_time[time]) {
@@ -190,7 +202,11 @@ class DialogController {
           createTime: time,
           banner: banner,
           about: '待定',
-          startLink: item.path
+          startLink: item.path,
+          src: '',
+          tags: [''],
+          title_cn: '',
+          collect: 0
         }
       }else {
         map_time[time] = {
@@ -202,7 +218,11 @@ class DialogController {
             createTime: time,
             banner: banner,
             about: '待定',
-            startLink: item.path
+            startLink: item.path,
+            src: '',
+            tags: [''],
+            title_cn: '',
+            collect: 0
           }
         }
       }
