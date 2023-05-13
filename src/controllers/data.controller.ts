@@ -1,11 +1,10 @@
 import fs from 'fs'
 import path from 'path'
-import { QueryAllQuickLinkData } from './decorator'
 import BaseController from './base.controller'
 import fse from 'fs-extra'
 
 class DataController extends BaseController {
-  #option_data: { default: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; time: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; collect: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData } = {
+  #option_data: OptionData = {
     'default': (content, newData) => this.#defaultData(content, newData),
     'time': (content, newData) => this.#timeData(content, newData),
     'collect': (content, newData) => this.#collectData(content, newData)
@@ -15,6 +14,12 @@ class DataController extends BaseController {
     super()
   }
 
+  /**
+   * 处理 quickLinkData_default.json 中数据；新增 ｜ 编辑
+   * @param content -文件的整体数据
+   * @param newData -新数据
+   * @returns 
+   */
   #defaultData(content: QuickLinkData, newData: QuickLinkDataItem) {
     if(content['default']) {
       content['default'][newData.id] = newData
@@ -24,6 +29,12 @@ class DataController extends BaseController {
     return content
   }
 
+  /**
+   * 处理 quickLinkData_time.json 中数据；新增 ｜ 编辑
+   * @param content -文件的整体数据
+   * @param newData -新数据
+   * @returns 
+   */
   #timeData(content: QuickLinkData, newData: QuickLinkDataItem) {
     let date = newData.createTime
     let year = (new Date(date)).getFullYear()
@@ -55,9 +66,9 @@ class DataController extends BaseController {
   }
 
   /**
-   * 编辑 新增 操作需要进行区分
-   * @param content 
-   * @param newData 
+   * 处理 quickLinkData_collect.json 中数据；新增 ｜ 编辑
+   * @param content -文件的整体数据
+   * @param newData -新数据
    * @returns 
    */
   #collectData(content: QuickLinkData, newData: QuickLinkDataItem) {
@@ -69,14 +80,26 @@ class DataController extends BaseController {
     return content
   }
 
+  /**
+   * 私有方法：新增
+   * @param newData -新数据
+   * @param pathname -数据存储文件路径
+   * @param type -匹配类型
+   */
   #create(newData: QuickLinkDataItem, pathname: string, type: string) {
     let content = JSON.parse(fs.readFileSync(pathname,{encoding: 'utf8'}) || '{}')
     const result = this.#option_data[type](content, newData)
     fs.writeFileSync(pathname, JSON.stringify(result), {encoding: 'utf8'})
   }
 
+  /**
+   * 私有方法：更新
+   * @param newData -新数据
+   * @param pathname -数据存储文件路径
+   * @param type -匹配类型
+   * @returns 
+   */
   #update(newData: QuickLinkDataItem, pathname: string, type: string) {
-    console.log('????----', this.#option_data[type])
     let content = JSON.parse(fs.readFileSync(pathname,{encoding: 'utf8'}))
     if(type === 'collect') {
       if(!content['default'] || !content['default'][newData.id]) {
@@ -87,44 +110,73 @@ class DataController extends BaseController {
     fs.writeFileSync(pathname, JSON.stringify(result), {encoding: 'utf8'})
   }
 
+  /**
+   * 私有方法：删除
+   * @param pathname -数据存储文件路径
+   * @param id -新数据id
+   */
+  #delete(pathname: string, id: string) {
+    const content = JSON.parse(fs.readFileSync(pathname,{encoding: 'utf8'}))
+    let keys = Object.keys(content)
+    for(let v of keys) {
+      if(content[v][id]) {
+        delete content[v][id]
+        break;
+      }
+    }
+    fs.writeFileSync(pathname, JSON.stringify(content), {encoding: 'utf8'})
+  }
+
+  /**
+   * 私有方法：收藏
+   * @param newData -新数据
+   * @param pathname -数据存储文件路径
+   * @param type -匹配类型
+   */
   #collect(newData: QuickLinkDataItem, pathname: string, type: string) {
     let content = JSON.parse(fs.readFileSync(pathname,{encoding: 'utf8'}) || '{}')
     const result = this.#option_data[type](content, newData)
     fs.writeFileSync(pathname, JSON.stringify(result), {encoding: 'utf8'})
   }
 
+  /**
+   * 公共方法：新增数据
+   * @param newData 
+   */
   addQuickLinkData(newData: QuickLinkDataItem) {
     this.queryAllQuickLinkData((pathname: string, type: string)=>{
       this.#create(newData, pathname, type)
     })
   }
 
+  /**
+   * 公共方法：更新数据
+   * @param newData 
+   */
   updateQuickLinkData(newData: QuickLinkDataItem) {
     this.queryAllQuickLinkData((pathname: string, type: string)=>{
       this.#update(newData, pathname, type)
     })
   }
 
+  /**
+   * 公共方法：收藏
+   * @param newData 
+   */
   collectQuickLinkData(newData: QuickLinkDataItem) {
     const dir = path.join(QUICK_LINK_DATA_PATH, 'quickLinkData_collect.json')
     fse.ensureFileSync(dir)
     this.#collect(newData, dir, 'collect')
   }
 
-  @QueryAllQuickLinkData()
+  /**
+   * 公共方法：删除
+   */
   deleteQuickLinkData() {
     const self = this
-    return (pathname: string)=>{
-      const content = JSON.parse(fs.readFileSync(pathname,{encoding: 'utf8'}))
-      let keys = Object.keys(content)
-      for(let v of keys) {
-        if(content[v][self.id]) {
-          delete content[v][self.id]
-          break;
-        }
-      }
-      fs.writeFileSync(pathname, JSON.stringify(content), {encoding: 'utf8'})
-    }
+    this.queryAllQuickLinkData((pathname: string)=> {
+      this.#delete(pathname, self.id)
+    })
   }
 
   /**

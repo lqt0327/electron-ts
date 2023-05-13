@@ -24,6 +24,12 @@ interface FileMessage {
   mTime: Date
 }
 
+interface OptionData {
+  default: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; 
+  time: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; 
+  collect: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData;
+}
+
 declare namespace ResponseParam {
   interface status {
     code: number;
