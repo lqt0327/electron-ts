@@ -25,19 +25,18 @@ interface FileMessage {
   path: string,
   fName: string,
   cTime: Date,
-  mTime: Date
+  mTime: Date,
+  content?: JSON
 }
 
 interface OptionData {
   default: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; 
   time: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData; 
-  collect: (content: QuickLinkData, newData: QuickLinkDataItem) => QuickLinkData;
 }
 
 interface OptionCollect {
   default: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData; 
   time: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData; 
-  collect: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData;
 }
 
 declare namespace ResponseParam {
@@ -66,4 +65,3 @@ declare namespace ResponseParam {
     result: string;
   }
 }
-

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, contextBridge } from 'electron';
 import path from 'path';
 import { showContextMenu } from './option';
 import DialogController from './controllers/dialog.controller';
@@ -25,14 +25,6 @@ const createWindow = (): void => {
 };
 
 app.whenReady().then(()=>{
-  ipcMain.handle('dialog:openFile', async (event ,selfFileType) => {
-    const dialog = new DialogController(['multiSelections', 'openDirectory'])
-    let fileList = await dialog.formatOpenFileData(selfFileType)
-    const file = new FileController()
-    file.createQuickLinkMap(fileList.title)
-    file.createQuickLinkMap(fileList.time, 'time') 
-    return fileList
-  })
 
   ipcMain.handle('dialog:selectImage', async ()=>{
     const dialog = new DialogController(['multiSelections', 'openFile'])
@@ -40,9 +32,9 @@ app.whenReady().then(()=>{
     return file
   })
 
-  ipcMain.handle('dialog:selectFile', async ()=>{
+  ipcMain.handle('dialog:selectFile', async (event, type="all")=>{
     const dialog = new DialogController(['multiSelections', 'openFile'])
-    let file = await dialog.handleFileOpen('all', 'file')
+    let file = await dialog.handleFileOpen(type, 'file')
     return file
   })
 
@@ -67,8 +59,8 @@ app.whenReady().then(()=>{
     }
   })
 
-  ipcMain.handle('action:getQuickLinkData', (event ,sort) => {
-    let dir = path.join(QUICK_LINK_DATA_PATH,`./quickLinkData_${sort}.json`)
+  ipcMain.handle('action:getQuickLinkData', (event) => {
+    let dir = path.join(QUICK_LINK_DATA_PATH,`./quickLinkData_default.json`)
     const file = new FileController()
     return file.getQuickLinkData(dir)
   })
@@ -87,16 +79,6 @@ app.whenReady().then(()=>{
     // TODO: 需要透出id加密方法到渲染层，在渲染层对newData进行数据处理
     const data = new DataController()
     return data.addQuickLinkData(newData)
-  })
-
-  ipcMain.handle('action:searchQuickLinkData', (event, keywords)=>{
-    const data = new DataController()
-    return data.searchQuickLinkData(keywords)
-  })
-
-  ipcMain.handle('action:cancelCollect', (event, id)=>{
-    const data = new DataController(id)
-    return data.cancelCollect()
   })
 
   /**
@@ -119,14 +101,6 @@ app.whenReady().then(()=>{
    */
   ipcMain.handle('action:open-app', async (event, link)=>{
     return shell.openPath(link)
-  })
-
-  /**
-   * 操作：收藏卡片
-   */
-  ipcMain.handle('action:collect', (event, newData) => {
-    const data = new DataController()
-    return data.collectQuickLinkData(newData)
   })
 
   createWindow()

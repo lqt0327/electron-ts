@@ -45,6 +45,9 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
+    "dexie": "^3.2.4",
+    "dexie-export-import": "^4.0.7",
+    "downloadjs": "^1.4.7",
     "electron-squirrel-startup": "^1.0.0",
     "file-type": "^18.2.1",
     "lodash": "^4.17.21",
