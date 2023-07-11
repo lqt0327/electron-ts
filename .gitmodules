@@ -1,3 +1,6 @@
 [submodule "electron_view_ts"]
 	path = electron_view_ts
 	url = git@github.com:lqt0327/electron_view_ts.git
+[submodule "electron_assets"]
+	path = electron_assets
+	url = git@github.com:lqt0327/electron_assets.git
