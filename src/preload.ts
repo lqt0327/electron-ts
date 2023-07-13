@@ -35,6 +35,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
   getQuickLinkData: async (type: string, sort: string) => {
+    await checkPathFormat()
+
     let data = []
     if(type === 'default') {
       data = await db.tbList.where('').above('').reverse().sortBy('createTime')
@@ -95,3 +97,24 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return ipcRenderer.invoke('action:addQuickLinkData', _newData)
   },
 })
+
+const path = {
+  basename: (pathname: string, ext?: string) => ipcRenderer.invoke('tools:pathBasename', pathname, ext),
+  dirname: (pathname: string) => ipcRenderer.invoke('tools:pathDirname', pathname),
+  join: (...target: string[]) => ipcRenderer.invoke('tools:pathJoin', ...target),
+}
+
+/**
+ * 检查路径格式
+ */
+async function checkPathFormat() {
+  const count = await db.tbList.count()
+  if(count > 0) {
+    const item = await db.tbList.where('').above('').first()
+    const c = await path.dirname(item.img)
+    const o = await path.join(process.env.INIT_CWD, 'electron_assets', 'images')
+    if(c !== o) {
+      await db.updatePathInAllTables(['img', 'banner'], o)
+    }
+  }
+}

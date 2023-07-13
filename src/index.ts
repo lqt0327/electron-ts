@@ -4,7 +4,7 @@ import { showContextMenu } from './option';
 import DialogController from './controllers/dialog.controller';
 import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
-import { encodeById, pathJoin, pathBasename } from './utils/tool';
+import { encodeById, pathJoin, pathBasename, pathDirname } from './utils/tool';
 import fse from 'fs-extra'
 
 const createWindow = (): void => {
@@ -86,7 +86,7 @@ app.whenReady().then(()=>{
    */
   ipcMain.handle('tools:encodeById', (event, id)=>{
     return encodeById(id)
-  }) 
+  })
 
   ipcMain.handle('tools:pathJoin', (event, ...target) => {
     return pathJoin(...target)
@@ -95,6 +95,11 @@ app.whenReady().then(()=>{
   ipcMain.handle('tools:pathBasename', (event, pathname, ext?: string)=>{
     return pathBasename(pathname, ext)
   })
+
+  ipcMain.handle('tools:pathDirname', (event, pathname)=>{
+    return pathDirname(pathname)
+  })
+
 
   /**
    * 打开本地程序or文件

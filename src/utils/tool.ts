@@ -68,7 +68,17 @@ function pathJoin(...args: string[]) {
 }
 
 function pathBasename(o: string, ext?: string) {
+    if(o.includes(':\\')) {
+        return path.win32.basename(o, ext)
+    }
     return path.basename(o, ext)
+}
+
+function pathDirname(o: string) {
+    if(o.includes(':\\')) {
+        return path.win32.dirname(o)
+    }
+    return path.dirname(o)
 }
 
 export {
@@ -78,5 +88,6 @@ export {
     decodeByBase64,
     encodeById,
     pathJoin,
-    pathBasename
+    pathBasename,
+    pathDirname
 }
