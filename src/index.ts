@@ -61,6 +61,7 @@ app.whenReady().then(()=>{
   // })
 
   ipcMain.handle('tools:copy', (event, src, dest)=>{
+    if(fse.existsSync(dest)) return
     return fse.copy(src, dest)
   })
 
