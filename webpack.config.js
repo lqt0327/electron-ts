@@ -1,7 +1,6 @@
 const webpack = require("webpack");
 const path = require('path')
 const logUtil = require('./util-log')
-const gulpFunc = require('./gulpfile')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const global = require('./global')
 const cwd = process.cwd()
@@ -65,39 +64,37 @@ const finalWebpackConfig = {
   ]
 }
 
-gulpFunc(()=>{
-  webpack(finalWebpackConfig, async (err, stats) => {
-    if (err) {
-        logUtil.error("Compilication failed.")
-        console.error(err.stack || err);
-        if (err.details) {
-            console.error(err.details);
-        }
-        process.exit(1);
-        return;
-    }
-    const info = stats.toJson();
-    if (stats.hasErrors()) {
-        let hasBuildError = false;
-  
-        // 只要有一个不是来自 uglify 的问题
-        for (let i = 0, len = info.errors.length; i < len; i++) {
-            if (!/from\s*UglifyJs/i.test(info.errors[i])) {
-                hasBuildError = true;
-                break;
-            }
-        }
-        if (hasBuildError) {
-            logUtil.error("Compilication failed.")
-            console.log(info.errors);
-  
-            process.exit(1);
-        }
-    }
-    if (stats.hasWarnings()) {
-        // logUtil.warn(info.warnings)
-    }
-  
-    logUtil.pass("Compilication done.")
-  })
+webpack(finalWebpackConfig, async (err, stats) => {
+  if (err) {
+      logUtil.error("Compilication failed.")
+      console.error(err.stack || err);
+      if (err.details) {
+          console.error(err.details);
+      }
+      process.exit(1);
+      return;
+  }
+  const info = stats.toJson();
+  if (stats.hasErrors()) {
+      let hasBuildError = false;
+
+      // 只要有一个不是来自 uglify 的问题
+      for (let i = 0, len = info.errors.length; i < len; i++) {
+          if (!/from\s*UglifyJs/i.test(info.errors[i])) {
+              hasBuildError = true;
+              break;
+          }
+      }
+      if (hasBuildError) {
+          logUtil.error("Compilication failed.")
+          console.log(info.errors);
+
+          process.exit(1);
+      }
+  }
+  if (stats.hasWarnings()) {
+      // logUtil.warn(info.warnings)
+  }
+
+  logUtil.pass("Compilication done.")
 })

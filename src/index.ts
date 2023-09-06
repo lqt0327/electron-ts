@@ -38,27 +38,6 @@ app.whenReady().then(()=>{
     return file
   })
 
-  ipcMain.handle('dialog:autoWriteListData', async ()=>{
-    const dialog = new DialogController(['multiSelections', 'openDirectory'])
-    const data = new DataController()
-    const { result, status } = await dialog.handleDirOpen()
-    // 直接改写data.json 中图片的路径
-    if(fse.statSync(path.join(result, '/data.json')).isFile()) {
-      const obj = fse.readJSONSync(path.join(result, '/data.json'))
-      for(let v of obj) {
-        v.img = path.join(result, '/images', path.basename(v.img))
-        v.banner = path.join(result, '/images', path.basename(v.banner))
-        data.addQuickLinkData(v)
-      }
-    }
-    return {
-      status: {
-        code: 0
-      },
-      result,
-    }
-  })
-
   ipcMain.handle('action:getQuickLinkData', (event) => {
     let dir = path.join(QUICK_LINK_DATA_PATH,`./quickLinkData_default.json`)
     const file = new FileController()
@@ -75,10 +54,14 @@ app.whenReady().then(()=>{
     return data.updateQuickLinkData(newData)
   })
 
-  ipcMain.handle('action:addQuickLinkData', (event, newData)=>{
-    // TODO: 需要透出id加密方法到渲染层，在渲染层对newData进行数据处理
-    const data = new DataController()
-    return data.addQuickLinkData(newData)
+  // ipcMain.handle('action:addQuickLinkData', (event, newData)=>{
+  //   // TODO: 需要透出id加密方法到渲染层，在渲染层对newData进行数据处理
+  //   const data = new DataController()
+  //   return data.addQuickLinkData(newData)
+  // })
+
+  ipcMain.handle('tools:copy', (event, src, dest)=>{
+    return fse.copy(src, dest)
   })
 
   /**
@@ -119,14 +102,8 @@ app.whenReady().then(()=>{
   })
 })
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

@@ -25,14 +25,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return importInto(db, file)
   },
 
-  initDatabase: async () => {
-    const data = await ipcRenderer.invoke('action:getQuickLinkData')
-    const list = Object.keys(data.default).map((key) => {
-      return data.default[key]
-    })
-    db.tbList.bulkAdd(list)
-  },
-
   openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
   getQuickLinkData: async (type: string, sort: string) => {
     await checkPathFormat()
@@ -67,8 +59,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     db.tbCollect.add(Object.assign(_newData, {collect: 1}));
     db.tbList.put(Object.assign(_newData, {collect: 1}));
   },
-  updateQuickLinkData: (id: string, newData: string) => {
+  updateQuickLinkData: async (id: string, newData: string) => {
     const _newData = JSON.parse(newData)
+    const img = _newData.img
+    const banner = _newData.banner
+    _newData.img = await formatPath(img)
+    _newData.banner = await formatPath(banner)
+    ipcRenderer.invoke('tools:copy', img, _newData.img)
+    ipcRenderer.invoke('tools:copy', banner, _newData.banner)
     db.tbList.put(_newData);
     return ipcRenderer.invoke('action:updateQuickLinkData', id, _newData)
   },
@@ -87,14 +85,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   selectImage: () => ipcRenderer.invoke('dialog:selectImage'),
   selectFile: () => ipcRenderer.invoke('dialog:selectFile'),
-  autoWriteListData: () => ipcRenderer.invoke('dialog:autoWriteListData'),
   pathBasename: (pathname: string, ext?: string) => ipcRenderer.invoke('tools:pathBasename', pathname, ext),
   encodeById: (id: string) => ipcRenderer.invoke('tools:encodeById', id),
   pathJoin: (...target: string[]) => ipcRenderer.invoke('tools:pathJoin', ...target),
-  addQuickLinkData: (newData: string) => {
+  addQuickLinkData: async (newData: string) => {
     const _newData = JSON.parse(newData)
+    const img = _newData.img
+    const banner = _newData.banner
+    _newData.img = await formatPath(img)
+    _newData.banner = await formatPath(banner)
+    ipcRenderer.invoke('tools:copy', img, _newData.img)
+    ipcRenderer.invoke('tools:copy', banner, _newData.banner)
     db.tbList.add(_newData);
-    return ipcRenderer.invoke('action:addQuickLinkData', _newData)
+    return 
   },
 })
 
@@ -117,4 +120,10 @@ async function checkPathFormat() {
       await db.updatePathInAllTables(['img', 'banner'], o)
     }
   }
+}
+
+async function formatPath(pathname: string) {
+  const c = await path.basename(pathname)
+  const o = await path.join(process.env.INIT_CWD, 'electron_assets', 'images', c)
+  return o
 }

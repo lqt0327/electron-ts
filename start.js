@@ -1,0 +1,64 @@
+const concurrently = require('concurrently')
+const path = require('path')
+const fs = require('fs')
+const logUtil = require('./util-log')
+
+function preview() {
+    return new Promise((resolve,reject)=>{
+        const { result } = concurrently(
+            [
+                {
+                    command: 'node webpack.config.js',
+                    name: 'webpack',
+                },
+                // {
+                //     command: `npm run start`,
+                //     name: 'view',
+                //     cwd: path.join(__dirname, 'electron_view_ts'),
+                // },
+            ],
+            {
+                prefix: 'name',
+                killOthers: ['failure', 'success'],
+                restartTries: 3,
+                prefixColors: ["cyanBright"]
+            }
+        )
+        result.then((res)=>{
+            logUtil.pass('webpack打包完成')
+            resolve(true)
+        },(err)=>{
+            logUtil.error('webpack打包失败' + JSON.stringify(err.message))
+            resolve(false)
+        })
+    })
+}
+
+
+function start() {
+    const { result } = concurrently(
+        [
+            {
+                command: 'electron .',
+                name: 'electron',
+                cwd: path.join(__dirname, 'dist'),
+            }
+        ],
+        {
+          prefix: 'name',
+          killOthers: ['failure', 'success'],
+        //   restartTries: 3,
+          prefixColors: ["yellowBright"]
+        }
+    )
+    result.then((res)=>{
+        logUtil.pass('electron启动完成')
+        // process.exit();
+    },(err)=>{
+        logUtil.error('electron启动失败')
+        process.exit();
+    })
+}
+// setTimeout(()=>{
+    preview().then(start)
+// }, 2000)
