@@ -59,6 +59,4 @@ function start() {
         process.exit();
     })
 }
-// setTimeout(()=>{
-    preview().then(start)
-// }, 2000)
+preview().then(start)
