@@ -25,6 +25,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return importInto(db, file)
   },
 
+  createTable: (tableName: string, schema: string) => {
+    if (db[tableName]) {
+      console.error('表已存在');
+      return;
+    }
+    return db.version(db.verno + 1).stores({
+      [tableName]: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect',
+    })
+  },
+
   openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
   getQuickLinkData: async (type: string, sort: string) => {
     await checkPathFormat()
