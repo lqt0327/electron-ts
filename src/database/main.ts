@@ -1,8 +1,9 @@
 import Dexie, { Table } from 'dexie';
 
 interface tbNameItem {
-  id: string;
+  id?: number;
   name: string;
+  value: string;
 }
 
 export class MySubClassedDexie extends Dexie {
@@ -13,7 +14,7 @@ export class MySubClassedDexie extends Dexie {
   constructor() {
     super('myDatabase');
     this.version(1).stores({
-        tbName: 'id,name',
+        tbName: '++id,name,value',
         tbList: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect',
         tbCollect: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect',
     });
@@ -36,18 +37,32 @@ export class MySubClassedDexie extends Dexie {
 
 const db = new MySubClassedDexie()
 
-db.tbName.bulkAdd([
-  {
-    id: 'tbList',
-    name: '全部'
-  },
-  {
-    id: 'tbCollect',
-    name: '收藏夹'
-  },
-])
+db.open().then(()=>{
+  db.transaction('rw', db.tbName, async ()=>{
+    const data = await db.tbName.toArray()
+    if(data.length === 0) {
+      db.tbName.bulkAdd([
+        {
+          value: 'tbList',
+          name: '全部'
+        },
+        {
+          value: 'tbCollect',
+          name: '收藏夹'
+        },
+      ])
+    }
+  }).then(() => {
+    console.log('Transaction completed successfully');
+  }).catch((error) => {
+    console.error('Transaction failed:', error);
+  });
+}).catch((error) => {
+  console.error('Error opening database:', error);
+});
 
 function basename(path: string) {
+  if(!path) return ''
   if(path.includes(':\\')) {
     return path.split('\\').pop()
   }

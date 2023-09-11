@@ -35,16 +35,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     })
   },
 
+  tableList: async () => {
+    return db.tbName.toArray()
+  },
+
   openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
-  getQuickLinkData: async (type: string, sort: string) => {
-    await checkPathFormat()
+  getQuickLinkData: async (table: string, sort: string) => {
+    await checkPathFormat(table)
 
     let data = []
-    if(type === 'default') {
-      data = await db.tbList.where('').above('').reverse().sortBy('createTime')
-    }
-    if(type === 'collect') {
-      data = await db.tbCollect.where('').above('').reverse().sortBy('createTime')
+    if(db[table]) {
+      data = await db[table].where('').above('').reverse().sortBy('createTime')
     }
     return {
       status: {
@@ -120,10 +121,10 @@ const path = {
 /**
  * 检查路径格式
  */
-async function checkPathFormat() {
-  const count = await db.tbList.count()
+async function checkPathFormat(table: string) {
+  const count = await db[table].count()
   if(count > 0) {
-    const item = await db.tbList.where('').above('').first()
+    const item = await db[table].where('').above('').first()
     const c = await path.dirname(item.img)
     const o = await path.join(process.env.INIT_CWD, 'electron_assets', 'images')
     if(c !== o) {
