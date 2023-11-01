@@ -1,23 +1,44 @@
-import Dexie, { Table } from 'dexie';
+import Dexie, { Version } from 'dexie';
+import localforage from 'localforage';
 
-interface tbNameItem {
-  id?: number;
-  name: string;
-  value: string;
-}
+class MyDatabase extends Dexie {
+  tbName: Dexie.Table;
+  tbList: Dexie.Table;
+  tbCollect: Dexie.Table;
 
-export class MySubClassedDexie extends Dexie {
-  tbList!: Table<QuickLinkDataItem>; 
-  tbCollect!: Table<QuickLinkDataItem>; 
-  tbName!: Table<tbNameItem>;
+  constructor(databaseName: string) {
+    super(databaseName);
 
-  constructor() {
-    super('myDatabase');
-    this.version(1).stores({
+    // console.log(this.verno,'???--')
+    // if(this.verno === 0) {
+      this.version(1).stores({
         tbName: '++id,name,value',
-        tbList: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect',
-        tbCollect: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect',
-    });
+        tbList: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect,custom_col',
+        tbCollect: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect,custom_col',
+      })
+      
+
+      this.tbName = this.table('tbName');
+      this.tbList = this.table('tbList');
+      this.tbCollect = this.table('tbCollect');
+      
+      this.tbName.count()
+        .then(count => {
+          if(count === 0) {
+            this.table('tbName').bulkAdd([
+              { value: 'tbList', name: '全部' },
+              { value: 'tbCollect', name: '收藏夹' },
+            ]);
+          }
+        })
+    // }
+  }
+
+  version(versionNumber: number): Version {
+    localforage.setItem('dbVersion', versionNumber).then(() => {
+      return localforage.ready();
+    })
+    return super.version(versionNumber);
   }
 
   async updatePathInAllTables(fieldName: string[], origin: string) {
@@ -32,33 +53,14 @@ export class MySubClassedDexie extends Dexie {
       });
     }
   }
-
 }
 
-const db = new MySubClassedDexie()
+const db = new MyDatabase('mydb');
 
-db.open().then(()=>{
-  db.transaction('rw', db.tbName, async ()=>{
-    const data = await db.tbName.toArray()
-    if(data.length === 0) {
-      db.tbName.bulkAdd([
-        {
-          value: 'tbList',
-          name: '全部'
-        },
-        {
-          value: 'tbCollect',
-          name: '收藏夹'
-        },
-      ])
-    }
-  }).then(() => {
-    console.log('Transaction completed successfully');
-  }).catch((error) => {
-    console.error('Transaction failed:', error);
-  });
-}).catch((error) => {
-  console.error('Error opening database:', error);
+
+// 使用示例
+db.tbName.toArray().then(data => {
+  console.log(data,'-----');
 });
 
 function basename(path: string) {
@@ -83,6 +85,7 @@ function pathFormat(path: string, origin: string) {
   }
 }
 
+
 export {
-    db,
-};
+  db
+}

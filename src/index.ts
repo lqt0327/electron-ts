@@ -6,6 +6,7 @@ import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
 import { encodeById, pathJoin, pathBasename, pathDirname } from './utils/tool';
 import fse from 'fs-extra'
+import os from 'os'
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
@@ -13,6 +14,7 @@ const createWindow = (): void => {
     width: 1200,
     webPreferences: {
       preload: path.join(__dirname, './preload.js'),
+      webSecurity: false
     },
   });
 
@@ -21,7 +23,7 @@ const createWindow = (): void => {
   mainWindow.loadFile(path.join(__dirname, 'view/index.html'));
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 };
 
 app.whenReady().then(()=>{
@@ -90,6 +92,10 @@ app.whenReady().then(()=>{
    */
   ipcMain.handle('action:open-app', async (event, link)=>{
     return shell.openPath(link)
+  })
+
+  ipcMain.on('screen-capture', (event, data) => {
+    console.log('niahdlfahslkdf---', os.platform())
   })
 
   createWindow()

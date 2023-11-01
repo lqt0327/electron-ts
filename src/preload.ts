@@ -13,6 +13,10 @@ window.addEventListener('contextmenu', (e) => {
   ipcRenderer.send('show-context-menu')
 })
 
+window.addEventListener('click', () => {
+  ipcRenderer.send('screen-capture')
+})
+
 contextBridge.exposeInMainWorld('electronAPI', {
 
   outputDatabase: () => {
@@ -25,14 +29,25 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return importInto(db, file)
   },
 
-  createTable: (tableName: string, schema: string) => {
-    if (db[tableName]) {
+  createTable: async (tableName: string, schema: string) => {
+    const count = await db.tbName.where('name').equals(tableName).count()
+    if(count > 0) {
       console.error('表已存在');
-      return;
+      return false
     }
-    return db.version(db.verno + 1).stores({
-      [tableName]: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect',
-    })
+    db.close();
+    const version = db.verno
+    const key = Date.now() + '_col'
+    db.version(version + 1).stores({
+      [key]: 'id,title,img,factory,createTime,banner,about,startLink,src,tags,title_cn,collect',
+    }).upgrade(() => {
+      db.tbName.add({
+        name: tableName,
+        value: key
+      });
+    });
+    db.open();
+    return true
   },
 
   tableList: async () => {
@@ -40,7 +55,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
-  getQuickLinkData: async (table: string, sort: string) => {
+  getQuickLinkData: async (table: string, sort: string)=>{
     await checkPathFormat(table)
 
     let data = []
@@ -54,21 +69,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
       result: data
     }
   },
+  getCollectList: async () => {
+    return db.tbName.toArray()
+  },
   deleteQuickLinkData: (id: string) => {
     db.tbList.delete(id);
     return ipcRenderer.invoke('action:deleteQuickLinkData', id)
   },
-  cancelCollect: async (id: string) => {
-    db.tbCollect.delete(id);
+  cancelCollect: async (id: string, table: string) => {
+    db[table].delete(id);
     const data = await db.tbList.where({
       id: id,
     }).first()
-    db.tbList.put(Object.assign(data, {collect: 0}));
+    if(table === 'tbCollect') {
+      db.tbList.put(Object.assign(data, {collect: 0}));
+    }else {
+      data.custom_col = data.custom_col?.filter((item: string) => item !== table)
+      db.tbList.put(data);
+    }
   },
-  collect: async (newData: string) => {
+  collect: async (newData: string, table: string) => {
     const _newData = JSON.parse(newData)
-    db.tbCollect.add(Object.assign(_newData, {collect: 1}));
-    db.tbList.put(Object.assign(_newData, {collect: 1}));
+    if(table === 'tbCollect') {
+      db[table].add(Object.assign(_newData, {collect: 1}));
+      db.tbList.put(Object.assign(_newData, {collect: 1}));
+    }else {
+      _newData.custom_col = [_newData.custom_col, table]
+      db.tbList.put(_newData);
+      db[table].add(_newData);
+    }
   },
   updateQuickLinkData: async (id: string, newData: string) => {
     const _newData = JSON.parse(newData)
@@ -93,6 +122,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
       },
       result: data
     }
+  },
+  captureImage() {
+    
   },
   selectImage: () => ipcRenderer.invoke('dialog:selectImage'),
   selectFile: () => ipcRenderer.invoke('dialog:selectFile'),
@@ -132,6 +164,7 @@ async function checkPathFormat(table: string) {
     }
   }
 }
+
 
 async function formatPath(pathname: string) {
   const c = await path.basename(pathname)
