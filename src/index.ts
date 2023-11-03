@@ -13,7 +13,7 @@ const db = new MyDatabase()
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 800,
-    width: 1200,
+    width: 1600,
     webPreferences: {
       preload: path.join(__dirname, './preload.js'),
       webSecurity: false
@@ -25,7 +25,7 @@ const createWindow = (): void => {
   mainWindow.loadFile(path.join(__dirname, 'view/index.html'));
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 app.whenReady().then(()=>{
@@ -97,7 +97,7 @@ app.whenReady().then(()=>{
   })
 
   ipcMain.on('screen-capture', (event, data) => {
-    console.log('niahdlfahslkdf---', os.platform())
+    // console.log('niahdlfahslkdf---', os.platform())
   })
 
   ipcMain.handle('db:createTable', (event, tableName)=>{
@@ -151,6 +151,10 @@ app.whenReady().then(()=>{
 
   ipcMain.handle('db:collect', (event, table, id)=>{
     return db.collect(table, id)
+  })
+
+  ipcMain.on('db:import', (event, filePath)=>{
+    return db.import(filePath)
   })
 
   createWindow()

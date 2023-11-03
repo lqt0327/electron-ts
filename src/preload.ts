@@ -1,9 +1,4 @@
 import { contextBridge, ipcRenderer } from 'electron'
-// import { db } from './database/main'
-// import {importDB, exportDB, importInto, peakImportFile} from "dexie-export-import";
-import download from 'downloadjs'
-// import { JsonStream } from 'dexie-export-import/dist/json-stream';
-// import { DexieExportJsonStructure } from 'dexie-export-import/dist/json-structure';
 
 /**
  * 显示鼠标右键菜单
@@ -25,20 +20,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // })
   },
 
-  // importDatabase: (file: Blob | JsonStream<DexieExportJsonStructure>) => {
-  //   // return importInto(db, file)
-  // },
+  importDatabase: (file: File) => {
+    ipcRenderer.send('db:import', file.path)
+    // ipcRenderer.invoke('db:import', file)
+    // return importInto(db, file)
+  },
 
   createTable: async (tableName: string, schema: string) => {
     return ipcRenderer.invoke('db:createTable', tableName)
   },
 
-  getCollectList: () => ipcRenderer.invoke('db:findAll', 'tb_name'),
+  getClassify: () => ipcRenderer.invoke('db:findAll', 'tb_name'),
+
+  getCollectList: () => ipcRenderer.invoke('db:findAll', 'tb_name', {skip: 1}),
 
   openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
   getQuickLinkData: async (table: string = 'tb_list', sort: string)=>{
     const data = await ipcRenderer.invoke('db:findAll', table, {sort: {createTime: -1}})
-    console.log(data,'????::::::')
     return {
       status: {
         code: 0,

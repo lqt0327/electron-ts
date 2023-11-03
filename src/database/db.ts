@@ -242,7 +242,7 @@ class MyDatabase {
       const status = await new Promise((resolve, reject)=> {
         this.tb_list.findOne({_id: id}, async (err, doc) => {
           if(err) reject(err)
-          const list = ['tb_list'].concat(doc.custom_col || [])
+          const list = ['tb_list'].concat(doc.custom_col)
           for(let tb of list) {
             await this.updateOne(tb, id, {$push: { custom_col: table }})
           }
@@ -309,6 +309,22 @@ class MyDatabase {
       fse.copyFileSync(banner, newData.banner)
       console.log(newData,'???;;;;;')
       await this.insertOne('tb_list', newData)
+      return true
+    }catch(err) {
+      console.error(err)
+      return false
+    }
+  }
+
+  /**
+   * TODO: 需要对custom_col中的表进行处理，新建相关表，并将数据插入到对应的表中
+   * @param filePath 
+   * @returns 
+   */
+  async import(filePath: string) {
+    try {
+      const data = await fse.readJSON(filePath, {encoding: 'utf-8'})
+      await this.insert('tb_list', data)
       return true
     }catch(err) {
       console.error(err)
