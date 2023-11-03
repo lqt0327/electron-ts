@@ -7,8 +7,12 @@ import FileController from './controllers/file.controller';
 import { encodeById, pathJoin, pathBasename, pathDirname } from './utils/tool';
 import fse from 'fs-extra'
 import os from 'os'
-import MyDatabase from './database/db'
-const db = new MyDatabase()
+
+
+import Database from 'better-sqlite3';
+const p = process.cwd()
+const db = new Database(path.join(p, 'database.db'), { verbose: console.log });
+console.log(db,'???---ppp')
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
@@ -98,59 +102,6 @@ app.whenReady().then(()=>{
 
   ipcMain.on('screen-capture', (event, data) => {
     console.log('niahdlfahslkdf---', os.platform())
-  })
-
-  ipcMain.handle('db:createTable', (event, tableName)=>{
-    return db.createTable(tableName)
-  })
-
-  ipcMain.handle('db:find', (event, table, key, value, options: Database.findOptions)=>{
-    return db.find(table, key, value, options)
-  })
-
-  ipcMain.handle('db:findAll', (event, table, options: Database.findOptions)=>{
-    return db.findAll(table, options)
-  })
-
-  ipcMain.handle('db:insertOne', (event, table, data)=> {
-    return db.insertOne(table, data)
-  })
-
-  ipcMain.handle('db:insert', (event, table, data)=> {
-    return db.insert(table, data)
-  })
-
-  ipcMain.handle('db:insertData', (event, data)=> {
-    return db.insertData(data)
-  })
-
-  ipcMain.handle('db:updateOne', (event, table, id, rule)=>{
-    
-    return db.updateOne(table, id, rule)
-  })
-
-  ipcMain.handle('db:updateData', (event, id, newData)=>{
-    return db.updateData(id, newData)
-  })
-
-  ipcMain.handle('db:deleteOne', (event, id)=>{
-    return db.deleteOne(id)
-  })
-
-  ipcMain.handle('db:delete', (event, table, id)=>{
-    return db.delete(table, id)
-  })
-
-  ipcMain.handle('db:deleteAll', (event, table)=>{
-    return db.deleteAll(table)
-  })
-
-  ipcMain.handle('db:cancelCollect', async (event, table, id) => {
-    return db.cancelCollect(table, id)
-  })
-
-  ipcMain.handle('db:collect', (event, table, id)=>{
-    return db.collect(table, id)
   })
 
   createWindow()

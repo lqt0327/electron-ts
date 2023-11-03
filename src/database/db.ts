@@ -1,0 +1,307 @@
+import Datastore from 'nedb';
+import path from 'path';
+import fse from 'fs-extra'
+import { Find } from './decorator'
+const cwd = process.cwd()
+
+class MyDatabase {
+  tb_collect: Datastore<any>;
+  tb_name: Datastore<any>;
+  tb_list: Datastore<any>;
+
+  constructor() {
+    this.tb_collect = new Datastore(path.join(cwd, 'database/tb_collect.db'));
+    this.tb_list = new Datastore(path.join(cwd, 'database/tb_list.db'));
+    this.tb_name = new Datastore(path.join(cwd, 'database/tb_name.db'));
+    this.tb_collect.loadDatabase();
+    this.tb_list.loadDatabase();
+    this.tb_name.loadDatabase();
+
+    this.initData()
+    this.updatePathInAllTables(['img', 'banner'])
+  }
+
+  @Find('tb_name', {value: 'tb_list'})
+  initData() {
+    return (docs: CollectItem[]) => {
+      if (docs.length === 0) {
+        const data = [
+          { value: 'tb_list', name: '全部' },
+          { value: 'tb_collect', name: '收藏夹' },
+        ]
+        this.tb_name.insert(data, (err, insertedData) => {
+          if (err) {
+            console.error('Error inserting data:', err);
+          } else {
+            console.log('Data inserted successfully');
+            console.log('Inserted data:', insertedData);
+          }
+        });
+      } else {
+        console.log('记录已存在');
+      }
+    }
+  }
+
+  async createTable(tableName: string) {
+    try {
+      const table = 'tb_' + Date.now()
+      this[table] = new Datastore({filename: path.join(cwd, `database/${table}.db`), autoload: true});
+      const res = await this.insertOne('tb_name', { value: table, name: tableName})
+      return Boolean(res)
+    }catch(err) {
+      console.error(err)
+      return 
+    }
+  }
+
+  find(table: string, key: string, value: string, options: Database.findOptions = {}) {
+    const regex = new RegExp(value, 'i');
+    const { sort, skip, limit } = options;
+  
+    const query = this[table].find({ [key]: regex });
+  
+    if (sort) {
+      query.sort(sort);
+    }
+  
+    if (skip) {
+      query.skip(skip);
+    }
+  
+    if (limit) {
+      query.limit(limit);
+    }
+  
+    return new Promise((resolve, reject)=> {
+      query.exec(function (err, docs) {
+        resolve(docs)
+      });
+    }) 
+  }
+
+  findFirst(table: string): Promise<QuickLinkDataItem> {
+    return new Promise((resolve, reject)=>{
+      this[table].findOne({}, function (err, docs: QuickLinkDataItem) {
+        return resolve(docs)
+      });
+    })
+  }
+
+  findAll(table: string, options: Database.findOptions = {}) {
+    const { sort, skip, limit } = options;
+    if(!this[table]) return []
+    const query = this[table].find({});
+  
+    if (sort) {
+      query.sort(sort);
+    }
+  
+    if (skip) {
+      query.skip(skip);
+    }
+  
+    if (limit) {
+      query.limit(limit);
+    }
+  
+    return new Promise((resolve, reject)=> {
+      query.exec(function (err, docs) {
+        resolve(docs)
+      });
+    }) 
+  }
+
+  async count(table: string): Promise<number> {
+    try {
+      const total = await new Promise<number>((resolve, reject)=>{
+        this[table].count({}, function (err, count) {
+          if(err) {
+            return reject(err)
+          }
+          return resolve(count)
+        })
+      })
+      return total;
+    }catch(err) {
+      console.error(err)
+      return 0
+    }
+  }
+
+  insertOne(table: string, data: object) {
+    return new Promise((resolve, reject)=>{
+      this[table].insert(data, function (err, newDoc) {
+        return resolve(newDoc)
+      });
+    })
+  }
+
+  insert(table: string, data: Array<object>) {
+    return new Promise((resolve, reject)=>{
+      this[table].insert(data, function (err, newDocs) {
+        return resolve(newDocs)
+      });
+    })
+  }
+
+  updateOne(table: string, id: string, rule: any) {
+    return new Promise((resolve, reject)=>{
+      this[table].update({ _id: id }, rule, {}, (err, numReplaced) => {
+        console.log(`成功更新了 ${numReplaced} 条记录`);
+        return resolve(numReplaced)
+      });
+    })
+  }
+
+  @Find('tb_name')
+  deleteOne(id: string) {
+    return (docs: CollectItem[]) => {
+      docs.forEach(async (doc: CollectItem)=>{
+        const table = doc.value
+        this.delete(table, id)
+      })
+    }
+  }
+
+  delete(table: string, id: string) {
+    return new Promise((resolve, reject)=>{
+      this[table].remove({ _id: id }, {}, function (err, numRemoved) {
+        console.log(`成功删除了 ${numRemoved} 条记录`);
+        return resolve(numRemoved)
+      });
+    })
+  }
+
+  deleteAll(table: string) {
+    return new Promise((resolve, reject)=>{
+      this[table].remove({}, { multi: true }, function (err, numRemoved) {
+        console.log(`成功删除了 ${numRemoved} 条记录`);
+        return resolve(numRemoved)
+      });
+    })
+  }
+
+  #updatePath(table: string, fieldName: string[], origin: string) {
+    return new Promise((resolve, reject)=>{
+      this[table].find({}, (err, docs: QuickLinkDataItem[]) => {
+      
+        docs.forEach((doc: QuickLinkDataItem) => {
+          for(let v of fieldName) {
+            doc[v] = pathFormat(doc[v], origin);
+          }
+      
+          // 更新数据库记录
+          this[table].update({ _id: doc._id }, doc, {}, (err, numReplaced) => {
+      
+            console.log(`Updated ${numReplaced} record(s) in ${table}`);
+            resolve(true)
+          });
+        });
+      });
+    })
+  }
+
+  @Find('tb_name')
+  updatePathInAllTables(fieldName: string[]) {
+    return (docs: CollectItem[]) => {
+      docs.forEach(async (doc: CollectItem)=>{
+        const table = doc.value
+        const count = await this.count(table)
+        if(count > 0) {
+          const item = await this.findFirst(table)
+          const c = path.dirname(item.img)
+          const o = path.join(process.env.INIT_CWD, 'electron_assets', 'images')
+          if(c !== o) {
+            this.#updatePath(table, fieldName, origin)
+          }
+        }
+      })
+    }
+  }
+
+  async collect(table: string, id: string) {
+    try{
+      const status = await new Promise((resolve, reject)=> {
+        this.tb_list.find({_id: id}, async (err, docs) => {
+          if(err) reject(err)
+          const list = ['tb_list'].concat(docs.custom_col)
+          for(let tb of list) {
+            await this.updateOne(tb, id, {$push: { custom_col: table }})
+          }
+          docs.custom_col.push(table)
+          await this.insert(table, docs)
+          resolve(true)
+        })
+      })
+      return status
+    }catch(err) {
+      console.error(err)
+      return false;
+    }
+  }
+
+  async cancelCollect(table: string, id: string) {
+    try {
+      const status = await new Promise((resolve, reject)=> {
+        this.tb_list.find({_id: id}, async (err, docs) => {
+          if(err) reject(err)
+          const list = ['tb_list'].concat(docs.custom_col)
+          for(let tb of list) {
+            await this.updateOne(tb, id, {$pull: { custom_col: table }})
+          }
+          await this.delete(table, id)
+          resolve(true)
+        })
+      })
+      return status
+    }catch(err) {
+      console.error(err)
+      return false
+    }
+  }
+
+  async updateData(id: string, newData: QuickLinkDataItem) {
+    try {
+      const img = newData.img
+      const banner = newData.banner
+      const origin = path.join(process.env.INIT_CWD, 'electron_assets', 'images')
+      newData.img = pathFormat(img, origin)
+      newData.banner = pathFormat(banner, origin)
+      fse.copyFileSync(img, newData.img)
+      fse.copyFileSync(banner, newData.banner)
+      const list = ['tb_list'].concat(newData.custom_col)
+      for(let tb of list) {
+        await this.updateOne(tb, id, newData)
+      }
+      return true
+    }catch(err) {
+      console.error(err)
+      return false
+    }
+  }
+
+  async insertData(newData: QuickLinkDataItem) {
+    try {
+      const img = newData.img
+      const banner = newData.banner
+      const origin = path.join(process.env.INIT_CWD, 'electron_assets', 'images')
+      newData.img = pathFormat(img, origin)
+      newData.banner = pathFormat(banner, origin)
+      fse.copyFileSync(img, newData.img)
+      fse.copyFileSync(banner, newData.banner)
+      await this.insertOne('tb_list', newData)
+      return true
+    }catch(err) {
+      console.error(err)
+      return false
+    }
+  }
+}
+
+function pathFormat(p: string, origin: string) {
+  const name = path.basename(p)
+  return path.join(origin, name)
+}
+
+export default MyDatabase;

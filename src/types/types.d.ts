@@ -7,7 +7,8 @@ interface QuickLinkData {
 }
 
 interface QuickLinkDataItem {
-  id: string;
+  id?: string;
+  _id: string;
   title: string;
   img: string;
   factory: string;
@@ -38,6 +39,20 @@ interface OptionData {
 interface OptionCollect {
   default: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData; 
   time: (content: QuickLinkData, collect: number, newData?: QuickLinkDataItem) => QuickLinkData; 
+}
+
+interface CollectItem {
+  _id: string;
+  value: string;
+  name: string;
+}
+
+declare namespace Database {
+  interface findOptions {
+    sort?: object,
+    skip?: number,
+    limit?: number
+  }
 }
 
 declare namespace ResponseParam {
