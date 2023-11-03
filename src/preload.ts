@@ -30,11 +30,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // },
 
   createTable: async (tableName: string, schema: string) => {
-    const result = await ipcRenderer.invoke('db:find', 'tbName', 'name', tableName)
-    if(result.length > 0) {
-      console.error('表已存在');
-      return false
-    }
     return ipcRenderer.invoke('db:createTable', tableName)
   },
 
@@ -43,6 +38,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openApp: (link: string) => ipcRenderer.invoke('action:open-app', link),
   getQuickLinkData: async (table: string = 'tb_list', sort: string)=>{
     const data = await ipcRenderer.invoke('db:findAll', table, {sort: {createTime: -1}})
+    console.log(data,'????::::::')
     return {
       status: {
         code: 0,

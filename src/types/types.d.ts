@@ -19,7 +19,7 @@ interface QuickLinkDataItem {
   src: string;
   tags: string[];
   title_cn: string;
-  collect: number;
+  collect?: number;
   custom_col?: string[]
 }
 

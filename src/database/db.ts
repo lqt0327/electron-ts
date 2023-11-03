@@ -21,7 +21,7 @@ class MyDatabase {
     this.updatePathInAllTables(['img', 'banner'])
   }
 
-  @Find('tb_name', {value: 'tb_list'})
+  @Find('tb_name')
   initData() {
     return (docs: CollectItem[]) => {
       if (docs.length === 0) {
@@ -38,24 +38,32 @@ class MyDatabase {
           }
         });
       } else {
-        console.log('记录已存在');
+        docs.forEach(doc=>{
+          const table = doc.value
+          this[table] = new Datastore({filename: path.join(cwd, `database/${table}.db`), autoload: true});
+        })
       }
     }
   }
 
   async createTable(tableName: string) {
     try {
+      const res = await this.find('tb_name', 'name', tableName)
+      if(res.length > 0) {
+        console.error('表已存在');
+        return false
+      }
       const table = 'tb_' + Date.now()
       this[table] = new Datastore({filename: path.join(cwd, `database/${table}.db`), autoload: true});
-      const res = await this.insertOne('tb_name', { value: table, name: tableName})
-      return Boolean(res)
+      const status = await this.insertOne('tb_name', { value: table, name: tableName})
+      return Boolean(status)
     }catch(err) {
       console.error(err)
-      return 
+      return  false
     }
   }
 
-  find(table: string, key: string, value: string, options: Database.findOptions = {}) {
+  find(table: string, key: string, value: string, options: Database.findOptions = {}): Promise<QuickLinkDataItem[]> {
     const regex = new RegExp(value, 'i');
     const { sort, skip, limit } = options;
   
@@ -75,6 +83,7 @@ class MyDatabase {
   
     return new Promise((resolve, reject)=> {
       query.exec(function (err, docs) {
+        if(err) console.error(err)
         resolve(docs)
       });
     }) 
@@ -83,6 +92,7 @@ class MyDatabase {
   findFirst(table: string): Promise<QuickLinkDataItem> {
     return new Promise((resolve, reject)=>{
       this[table].findOne({}, function (err, docs: QuickLinkDataItem) {
+        if(err) console.error(err)
         return resolve(docs)
       });
     })
@@ -107,6 +117,7 @@ class MyDatabase {
   
     return new Promise((resolve, reject)=> {
       query.exec(function (err, docs) {
+        if(err) console.error(err)
         resolve(docs)
       });
     }) 
@@ -132,6 +143,7 @@ class MyDatabase {
   insertOne(table: string, data: object) {
     return new Promise((resolve, reject)=>{
       this[table].insert(data, function (err, newDoc) {
+        if(err) console.error(err)
         return resolve(newDoc)
       });
     })
@@ -140,6 +152,7 @@ class MyDatabase {
   insert(table: string, data: Array<object>) {
     return new Promise((resolve, reject)=>{
       this[table].insert(data, function (err, newDocs) {
+        if(err) console.error(err)
         return resolve(newDocs)
       });
     })
@@ -148,6 +161,7 @@ class MyDatabase {
   updateOne(table: string, id: string, rule: any) {
     return new Promise((resolve, reject)=>{
       this[table].update({ _id: id }, rule, {}, (err, numReplaced) => {
+        if(err) console.error(err)
         console.log(`成功更新了 ${numReplaced} 条记录`);
         return resolve(numReplaced)
       });
@@ -167,6 +181,7 @@ class MyDatabase {
   delete(table: string, id: string) {
     return new Promise((resolve, reject)=>{
       this[table].remove({ _id: id }, {}, function (err, numRemoved) {
+        if(err) console.error(err)
         console.log(`成功删除了 ${numRemoved} 条记录`);
         return resolve(numRemoved)
       });
@@ -185,7 +200,8 @@ class MyDatabase {
   #updatePath(table: string, fieldName: string[], origin: string) {
     return new Promise((resolve, reject)=>{
       this[table].find({}, (err, docs: QuickLinkDataItem[]) => {
-      
+        if(err) console.error(err)
+        
         docs.forEach((doc: QuickLinkDataItem) => {
           for(let v of fieldName) {
             doc[v] = pathFormat(doc[v], origin);
@@ -193,6 +209,7 @@ class MyDatabase {
       
           // 更新数据库记录
           this[table].update({ _id: doc._id }, doc, {}, (err, numReplaced) => {
+            if(err) console.error(err)
       
             console.log(`Updated ${numReplaced} record(s) in ${table}`);
             resolve(true)
@@ -223,14 +240,14 @@ class MyDatabase {
   async collect(table: string, id: string) {
     try{
       const status = await new Promise((resolve, reject)=> {
-        this.tb_list.find({_id: id}, async (err, docs) => {
+        this.tb_list.findOne({_id: id}, async (err, doc) => {
           if(err) reject(err)
-          const list = ['tb_list'].concat(docs.custom_col)
+          const list = ['tb_list'].concat(doc.custom_col || [])
           for(let tb of list) {
             await this.updateOne(tb, id, {$push: { custom_col: table }})
           }
-          docs.custom_col.push(table)
-          await this.insert(table, docs)
+          doc.custom_col.push(table)
+          await this.insertOne(table, doc)
           resolve(true)
         })
       })
@@ -246,7 +263,7 @@ class MyDatabase {
       const status = await new Promise((resolve, reject)=> {
         this.tb_list.find({_id: id}, async (err, docs) => {
           if(err) reject(err)
-          const list = ['tb_list'].concat(docs.custom_col)
+          const list = ['tb_list'].concat(docs.custom_col || [])
           for(let tb of list) {
             await this.updateOne(tb, id, {$pull: { custom_col: table }})
           }
@@ -270,7 +287,7 @@ class MyDatabase {
       newData.banner = pathFormat(banner, origin)
       fse.copyFileSync(img, newData.img)
       fse.copyFileSync(banner, newData.banner)
-      const list = ['tb_list'].concat(newData.custom_col)
+      const list = ['tb_list'].concat(newData.custom_col || [])
       for(let tb of list) {
         await this.updateOne(tb, id, newData)
       }
@@ -290,6 +307,7 @@ class MyDatabase {
       newData.banner = pathFormat(banner, origin)
       fse.copyFileSync(img, newData.img)
       fse.copyFileSync(banner, newData.banner)
+      console.log(newData,'???;;;;;')
       await this.insertOne('tb_list', newData)
       return true
     }catch(err) {
