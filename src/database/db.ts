@@ -206,12 +206,11 @@ class MyDatabase {
           for(let v of fieldName) {
             doc[v] = pathFormat(doc[v], origin);
           }
-      
           // 更新数据库记录
           this[table].update({ _id: doc._id }, doc, {}, (err, numReplaced) => {
             if(err) console.error(err)
       
-            console.log(`Updated ${numReplaced} record(s) in ${table}`);
+            // console.log(`Updated ${numReplaced} record(s) in ${table}`);
             resolve(true)
           });
         });
@@ -230,7 +229,7 @@ class MyDatabase {
           const c = path.dirname(item.img)
           const o = path.join(process.env.INIT_CWD, 'electron_assets', 'images')
           if(c !== o) {
-            this.#updatePath(table, fieldName, origin)
+            this.#updatePath(table, fieldName, o)
           }
         }
       })
@@ -307,7 +306,6 @@ class MyDatabase {
       newData.banner = pathFormat(banner, origin)
       fse.copyFileSync(img, newData.img)
       fse.copyFileSync(banner, newData.banner)
-      console.log(newData,'???;;;;;')
       await this.insertOne('tb_list', newData)
       return true
     }catch(err) {
@@ -324,17 +322,66 @@ class MyDatabase {
   async import(filePath: string) {
     try {
       const data = await fse.readJSON(filePath, {encoding: 'utf-8'})
-      await this.insert('tb_list', data)
+      for(let item of data) {
+        const table = item.tableName
+        const rows = item.rows
+        // 默认表存在重复注入问题，需要过滤重复数据
+        if(table === 'tb_name') {
+          const tmp = rows.filter(item=> (item.value ! == 'tb_list') && (item.value !== 'tb_collect'))
+          await this.insert(table, tmp)
+        }
+        else if(this[table]) {
+          await this.insert(table, rows)
+        }
+        else {
+          this[table] = new Datastore({filename: path.join(cwd, `database/${table}.db`), autoload: true});
+          await this.insert(table, rows)
+        }
+      }
+      
       return true
     }catch(err) {
       console.error(err)
       return false
     }
   }
+
+  async output() {
+    try {
+      const arr = []
+      const tables = await this.findAll('tb_name')
+      if(Array.isArray(tables)) {
+        for(let item of tables) {
+          const table = item.value
+          const rows = await this.findAll(table)
+          const tmp = {
+            tableName: table,
+            rows: rows
+          }
+          arr.push(tmp)
+        }
+      }
+      const rows = await this.findAll('tb_name')
+      arr.push({
+        tableName: 'tb_name',
+        rows: rows
+      })
+      return arr
+    }catch(err) {
+      console.error(err)
+      return []
+    }
+    
+  }
 }
 
 function pathFormat(p: string, origin: string) {
-  const name = path.basename(p)
+  let name = '';
+  if(p.includes(':\\')) {
+    name = path.win32.basename(p)
+  }else {
+    name = path.basename(p)
+  }
   return path.join(origin, name)
 }
 
