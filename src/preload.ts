@@ -15,8 +15,8 @@ window.addEventListener('click', () => {
 
 contextBridge.exposeInMainWorld('electronAPI', {
 
-  outputDatabase: async () => {
-    const data = await ipcRenderer.invoke('db:output')
+  exportDatabase: async () => {
+    const data = await ipcRenderer.invoke('db:export')
     download(new Blob([JSON.stringify(data)]), "database-export.json", "application/json;charset=utf-8")
   },
 
@@ -26,7 +26,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return ipcRenderer.invoke('db:createTable', tableName)
   },
 
-  getClassify: () => ipcRenderer.invoke('db:findAll', 'tb_name'),
+  getClassify: () => ipcRenderer.invoke('db:findAll', 'tb_name', {sort: {sort: 1}}),
+
+  updateClassify: (table: string, data: string) => ipcRenderer.invoke('db:updateAll', table, data),
 
   getCollectList: () => ipcRenderer.invoke('db:findAll', 'tb_name', {skip: 1}),
 

@@ -126,8 +126,12 @@ app.whenReady().then(()=>{
   })
 
   ipcMain.handle('db:updateOne', (event, table, id, rule)=>{
-    
     return db.updateOne(table, id, rule)
+  })
+
+  ipcMain.handle('db:updateAll', (event, table, data)=> {
+    const newData = JSON.parse(data)
+    return db.updateAll(table, newData)
   })
 
   ipcMain.handle('db:updateData', (event, id, newData)=>{
@@ -158,8 +162,8 @@ app.whenReady().then(()=>{
     return db.import(filePath)
   })
 
-  ipcMain.handle('db:output', (event) => {
-    return db.output()
+  ipcMain.handle('db:export', (event) => {
+    return db.export()
   })
 
   createWindow()

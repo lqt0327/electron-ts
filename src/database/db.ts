@@ -168,6 +168,18 @@ class MyDatabase {
     })
   }
 
+  async updateAll(table: string, newData: any) {
+    try{
+      for(let data of newData) {
+        await this.updateOne(table, data._id, data)
+      }
+      return true
+    }catch(err) {
+      console.error(err)
+      return false
+    }
+  }
+
   @Find('tb_name')
   deleteOne(id: string) {
     return (docs: CollectItem[]) => {
@@ -327,7 +339,7 @@ class MyDatabase {
         const rows = item.rows
         // 默认表存在重复注入问题，需要过滤重复数据
         if(table === 'tb_name') {
-          const tmp = rows.filter(item=> (item.value ! == 'tb_list') && (item.value !== 'tb_collect'))
+          const tmp = rows.filter(item=> (item.value !== 'tb_list') && (item.value !== 'tb_collect'))
           await this.insert(table, tmp)
         }
         else if(this[table]) {
@@ -346,7 +358,7 @@ class MyDatabase {
     }
   }
 
-  async output() {
+  async export() {
     try {
       const arr = []
       const tables = await this.findAll('tb_name')

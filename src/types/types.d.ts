@@ -45,6 +45,7 @@ interface CollectItem {
   _id: string;
   value: string;
   name: string;
+  sort?: number;
 }
 
 declare namespace Database {
