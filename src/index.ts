@@ -6,14 +6,13 @@ import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
 import { encodeById, pathJoin, pathBasename, pathDirname } from './utils/tool';
 import fse from 'fs-extra'
-import os from 'os'
 import MyDatabase from './database/db'
 const db = new MyDatabase()
 
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 800,
-    width: 1600,
+    width: 1000,
     webPreferences: {
       preload: path.join(__dirname, './preload.js'),
       webSecurity: false
@@ -25,7 +24,9 @@ const createWindow = (): void => {
   mainWindow.loadFile(path.join(__dirname, 'view/index.html'));
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.once('dom-ready', () => {
+    mainWindow.webContents.openDevTools();
+  });
 };
 
 app.whenReady().then(()=>{
@@ -125,8 +126,12 @@ app.whenReady().then(()=>{
   })
 
   ipcMain.handle('db:updateOne', (event, table, id, rule)=>{
-    
     return db.updateOne(table, id, rule)
+  })
+
+  ipcMain.handle('db:updateAll', (event, table, data)=> {
+    const newData = JSON.parse(data)
+    return db.updateAll(table, newData)
   })
 
   ipcMain.handle('db:updateData', (event, id, newData)=>{
@@ -155,6 +160,10 @@ app.whenReady().then(()=>{
 
   ipcMain.on('db:import', (event, filePath)=>{
     return db.import(filePath)
+  })
+
+  ipcMain.handle('db:export', (event) => {
+    return db.export()
   })
 
   createWindow()

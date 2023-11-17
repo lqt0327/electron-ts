@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import download from 'downloadjs'
 
 /**
  * 显示鼠标右键菜单
@@ -14,23 +15,20 @@ window.addEventListener('click', () => {
 
 contextBridge.exposeInMainWorld('electronAPI', {
 
-  outputDatabase: () => {
-    // exportDB(db, {prettyJson: true}).then(blob=>{
-    //   download(blob, "dexie-export.json", "application/json");
-    // })
+  exportDatabase: async () => {
+    const data = await ipcRenderer.invoke('db:export')
+    download(new Blob([JSON.stringify(data)]), "database-export.json", "application/json;charset=utf-8")
   },
 
-  importDatabase: (file: File) => {
-    ipcRenderer.send('db:import', file.path)
-    // ipcRenderer.invoke('db:import', file)
-    // return importInto(db, file)
-  },
+  importDatabase: (file: File) => ipcRenderer.send('db:import', file.path),
 
   createTable: async (tableName: string, schema: string) => {
     return ipcRenderer.invoke('db:createTable', tableName)
   },
 
-  getClassify: () => ipcRenderer.invoke('db:findAll', 'tb_name'),
+  getClassify: () => ipcRenderer.invoke('db:findAll', 'tb_name', {sort: {sort: 1}}),
+
+  updateClassify: (table: string, data: string) => ipcRenderer.invoke('db:updateAll', table, data),
 
   getCollectList: () => ipcRenderer.invoke('db:findAll', 'tb_name', {skip: 1}),
 
