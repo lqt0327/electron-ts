@@ -334,7 +334,10 @@ class MyDatabase {
 }
 
 function pathFormat(p: string, origin: string) {
-  const name = path.basename(p)
+  // const name = path.basename(p)
+  const ext = path.extname(p)
+  const timestamp = Math.floor(Date.now() / 1000);
+  const name = `normal_${timestamp+ext}`
   return path.join(origin, name)
 }
 
