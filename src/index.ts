@@ -1,6 +1,6 @@
-import { app, BrowserWindow, ipcMain, shell, contextBridge } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
-import { showContextMenu } from './option';
+import { showContextMenu, setApplicationMenu } from './option';
 import DialogController from './controllers/dialog.controller';
 import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
@@ -9,9 +9,11 @@ import fse from 'fs-extra'
 import MyDatabase from './database/db'
 const db = new MyDatabase()
 
+app.setName('llscw')
+
 const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
-    height: 800,
+    height: 400,
     width: 1000,
     webPreferences: {
       preload: path.join(__dirname, './preload.js'),
@@ -27,6 +29,9 @@ const createWindow = (): void => {
   mainWindow.webContents.once('dom-ready', () => {
     mainWindow.webContents.openDevTools();
   });
+
+  setApplicationMenu()
+
 };
 
 app.whenReady().then(()=>{
@@ -95,6 +100,10 @@ app.whenReady().then(()=>{
    */
   ipcMain.handle('action:open-app', async (event, link)=>{
     return shell.openPath(link)
+  })
+
+  ipcMain.handle('action:showItemInFolder', (event, link) => {
+    return shell.showItemInFolder(link)
   })
 
   ipcMain.on('screen-capture', (event, data) => {

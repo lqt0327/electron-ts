@@ -71,4 +71,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const _newData = JSON.parse(newData)
     return ipcRenderer.invoke('db:insertData', _newData)
   },
+  showItemInFolder: (link: string) => ipcRenderer.invoke('action:showItemInFolder', link)
 })

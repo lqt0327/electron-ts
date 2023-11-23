@@ -1,5 +1,5 @@
 {
-  "name": "electron-ts",
+  "name": "llscw",
   "version": "1.0.0",
   "description": "pc端快捷启动程序",
   "main": "dist/index.js",

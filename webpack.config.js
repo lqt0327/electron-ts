@@ -2,6 +2,7 @@ const webpack = require("webpack");
 const path = require('path')
 const logUtil = require('./util-log')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const global = require('./global')
 const cwd = process.cwd()
 
@@ -15,6 +16,9 @@ const finalWebpackConfig = {
     ],
     preload: [
       './preload.ts'
+    ],
+    toast: [
+      './module/toast/index.ts'
     ]
   },
   externals: { electron: 'commonjs electron' },
@@ -55,6 +59,16 @@ const finalWebpackConfig = {
     ],
   },
   plugins: [
+    new HtmlWebpackPlugin({
+      template: 'module/toast/index.html',  // 指定 HTML 模板文件路径
+      filename: 'toast.html',  // 输出的 HTML 文件名
+      chunks: []
+    }),
+    new HtmlWebpackPlugin({
+      template: 'module/capture/index.html',  // 指定 HTML 模板文件路径
+      filename: 'capture.html',  // 输出的 HTML 文件名
+      chunks: []
+    }),
     new ForkTsCheckerWebpackPlugin({
       typescript: {configFile: path.join(cwd, 'tsconfig.json')}
     }),
