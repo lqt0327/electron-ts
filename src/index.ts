@@ -1,13 +1,16 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
-import path from 'path';
+import { app, BrowserWindow, ipcMain, shell, globalShortcut } from 'electron';
 import { showContextMenu, setApplicationMenu } from './option';
 import DialogController from './controllers/dialog.controller';
 import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
 import { encodeById, pathJoin, pathBasename, pathDirname } from './utils/tool';
-import fse from 'fs-extra'
+import Capture from './module/capture/index'
 import MyDatabase from './database/db'
+import fse from 'fs-extra'
+import path from 'path';
 const db = new MyDatabase()
+
+const capture = new Capture()
 
 app.setName('llscw')
 
@@ -32,6 +35,9 @@ const createWindow = (): void => {
 
   setApplicationMenu()
 
+  // globalShortcut.register('Esc', ()=>{
+  //   console.log('点击退出')
+  // })
 };
 
 app.whenReady().then(()=>{
@@ -108,6 +114,7 @@ app.whenReady().then(()=>{
 
   ipcMain.on('screen-capture', (event, data) => {
     // console.log('niahdlfahslkdf---', os.platform())
+    capture.capture()
   })
 
   ipcMain.handle('db:createTable', (event, tableName)=>{

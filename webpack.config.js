@@ -19,6 +19,12 @@ const finalWebpackConfig = {
     ],
     toast: [
       './module/toast/index.ts'
+    ],
+    capture: [
+      './module/capture/index.ts'
+    ],
+    preload: [
+      './module/capture/preload.ts'
     ]
   },
   externals: { electron: 'commonjs electron' },
@@ -28,7 +34,18 @@ const finalWebpackConfig = {
   output: {
     path: path.join(__dirname, 'dist'),
     publicPath: '/', // 服务器脚本会用到
-    filename: '[name].js'
+    filename: (chunkData) => {
+      const entryName = chunkData.chunk.name;
+      const entryPath = chunkData.chunk.entryModule.resource;
+      const entryDir = path.dirname(entryPath);
+      const outputPath = path.join(entryDir, entryName, '[name].bundle.js');
+      console.log(entryName,'???--', entryDir, entryPath.split('module/')[1])
+      if(entryDir.includes('module/')) {
+        const dir = entryDir.split('module/')[1]
+        return `${dir}/[name].js`;
+      }
+      return '[name].js'
+    }
   },
   module: {
     rules: [
@@ -60,20 +77,20 @@ const finalWebpackConfig = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'module/toast/index.html',  // 指定 HTML 模板文件路径
-      filename: 'toast.html',  // 输出的 HTML 文件名
+      template: 'module/toast/toast.html',  // 指定 HTML 模板文件路径
+      filename: 'toast/toast.html',  // 输出的 HTML 文件名
       chunks: []
     }),
     new HtmlWebpackPlugin({
-      template: 'module/capture/index.html',  // 指定 HTML 模板文件路径
-      filename: 'capture.html',  // 输出的 HTML 文件名
+      template: 'module/capture/capture.html',  // 指定 HTML 模板文件路径
+      filename: 'capture/capture.html',  // 输出的 HTML 文件名
       chunks: []
     }),
     new ForkTsCheckerWebpackPlugin({
       typescript: {configFile: path.join(cwd, 'tsconfig.json')}
     }),
     new webpack.DefinePlugin({
-      QUICK_LINK_DATA_PATH: JSON.stringify(global.QUICK_LINK_DATA_PATH),
+      ...global
     })
   ]
 }
