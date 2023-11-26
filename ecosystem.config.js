@@ -15,6 +15,6 @@ module.exports = {
       watch: ["./electron_view_ts/src"],
       watch_delay: 1000,
       ignore_watch : ["*/**/*.d.ts"],
-    }
+    },
   ]
 }

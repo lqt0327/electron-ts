@@ -28,7 +28,7 @@ function preview() {
             logUtil.pass('webpack打包完成')
             resolve(true)
         },(err)=>{
-            logUtil.error('webpack打包失败' + JSON.stringify(err.message))
+            logUtil.error('webpack打包失败' + JSON.stringify(err))
             resolve(false)
         })
     })
@@ -42,6 +42,11 @@ function start() {
                 command: 'electron .',
                 name: 'electron',
                 cwd: path.join(__dirname, 'dist'),
+            },
+            {
+                command: 'node index.js',
+                name: 'python-capture',
+                cwd: path.join(__dirname, 'electron_assets'),
             }
         ],
         {

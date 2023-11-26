@@ -1,6 +1,7 @@
 declare const QUICK_LINK_DATA_PATH: string;
 declare const TOAST_ROOR_PATH: string;
 declare const CAPTURE_ROOT_PATH: string;
+declare const PYTHON_PATH: string;
 
 interface QuickLinkData {
   [key: string]: {
@@ -54,7 +55,8 @@ declare namespace Database {
   interface findOptions {
     sort?: object,
     skip?: number,
-    limit?: number
+    limit?: number,
+    rule?: object,
   }
 }
 

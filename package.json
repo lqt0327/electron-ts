@@ -47,11 +47,14 @@
     "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.9.11",
+    "@grpc/proto-loader": "^0.7.10",
     "downloadjs": "^1.4.7",
     "electron-squirrel-startup": "^1.0.0",
     "file-type": "^18.2.1",
     "jimp": "^0.3.5",
     "lodash": "^4.17.21",
+    "minimist": "^1.2.8",
     "nedb": "^1.8.0",
     "sortablejs": "^1.15.0",
     "typeorm": "^0.3.17",

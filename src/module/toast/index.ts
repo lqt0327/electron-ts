@@ -14,7 +14,7 @@ function showToast(message: string, delay: number = 1500) {
     },
   });
 
-  toastWindow.loadFile(path.join(__dirname, './toast.html'));
+  toastWindow.loadFile(path.join(TOAST_ROOR_PATH, 'toast.html'));
   
   // 向 toast.html 页面发送消息
   toastWindow.webContents.on('did-finish-load', () => {

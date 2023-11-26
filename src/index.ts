@@ -8,6 +8,7 @@ import Capture from './module/capture/index'
 import MyDatabase from './database/db'
 import fse from 'fs-extra'
 import path from 'path';
+
 const db = new MyDatabase()
 
 const capture = new Capture()

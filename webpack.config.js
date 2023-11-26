@@ -23,9 +23,9 @@ const finalWebpackConfig = {
     capture: [
       './module/capture/index.ts'
     ],
-    preload: [
-      './module/capture/preload.ts'
-    ]
+    'preload.capture': [
+      './module/capture/preload.capture.ts'
+    ],
   },
   externals: { electron: 'commonjs electron' },
   resolve: {
@@ -39,9 +39,10 @@ const finalWebpackConfig = {
       const entryPath = chunkData.chunk.entryModule.resource;
       const entryDir = path.dirname(entryPath);
       const outputPath = path.join(entryDir, entryName, '[name].bundle.js');
-      console.log(entryName,'???--', entryDir, entryPath.split('module/')[1])
-      if(entryDir.includes('module/')) {
-        const dir = entryDir.split('module/')[1]
+      console.log(entryName,'???--', entryDir)
+      if(entryDir.includes('module')) {
+        const dir = entryDir.split('module')[1]
+        console.log(dir,'???>>mm')
         return `${dir}/[name].js`;
       }
       return '[name].js'

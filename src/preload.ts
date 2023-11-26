@@ -10,7 +10,7 @@ window.addEventListener('contextmenu', (e) => {
 })
 
 window.addEventListener('click', () => {
-  ipcRenderer.send('screen-capture')
+  // ipcRenderer.send('screen-capture')
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {

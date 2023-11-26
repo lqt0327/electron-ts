@@ -99,9 +99,9 @@ class MyDatabase {
   }
 
   findAll(table: string, options: Database.findOptions = {}) {
-    const { sort, skip, limit } = options;
+    const { sort, skip, limit, rule } = options;
     if(!this[table]) return []
-    const query = this[table].find({});
+    const query = this[table].find(rule || {});
   
     if (sort) {
       query.sort(sort);
@@ -389,8 +389,12 @@ class MyDatabase {
 
 function pathFormat(p: string, origin: string) {
   let name = '';
-  if(p.includes(':\\')) {
-    name = path.win32.basename(p)
+  if(process.platform !== 'win32') {
+    if(p.includes(':\\')) {
+      name = path.win32.basename(p)
+    }else {
+      name = path.basename(p)
+    }
   }else {
     name = path.basename(p)
   }
