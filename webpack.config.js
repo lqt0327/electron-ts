@@ -3,6 +3,7 @@ const path = require('path')
 const logUtil = require('./util-log')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 const global = require('./global')
 const cwd = process.cwd()
 
@@ -77,6 +78,11 @@ const finalWebpackConfig = {
     ],
   },
   plugins: [
+    new CopyPlugin({
+      patterns: [
+        { from: "module/capture/iconfont", to: "capture/iconfont" },
+      ],
+    }),
     new HtmlWebpackPlugin({
       template: 'module/toast/toast.html',  // 指定 HTML 模板文件路径
       filename: 'toast/toast.html',  // 输出的 HTML 文件名

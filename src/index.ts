@@ -11,8 +11,6 @@ import path from 'path';
 
 const db = new MyDatabase()
 
-const capture = new Capture()
-
 app.setName('llscw')
 
 const createWindow = (): void => {
@@ -115,6 +113,7 @@ app.whenReady().then(()=>{
 
   ipcMain.on('screen-capture', (event, data) => {
     // console.log('niahdlfahslkdf---', os.platform())
+    const capture = new Capture()
     capture.capture()
   })
 

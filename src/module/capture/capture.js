@@ -16,7 +16,7 @@
  *
  */
 import { join } from 'path';
-var PROTO_PATH = join(__dirname, '..', 'python/capture/capture.proto');
+var PROTO_PATH = join(PYTHON_PATH, 'capture/capture.proto');
 
 import parseArgs from 'minimist';
 import { loadPackageDefinition, credentials } from '@grpc/grpc-js';
