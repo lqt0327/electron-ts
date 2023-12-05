@@ -4,6 +4,7 @@ const logUtil = require('./util-log')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require("copy-webpack-plugin");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const global = require('./global')
 const cwd = process.cwd()
 
@@ -28,9 +29,9 @@ const finalWebpackConfig = {
       './module/capture/preload.capture.ts'
     ],
   },
-  externals: { electron: 'commonjs electron', screenCapture: 'commonjs screenCapture'},
+  externals: { electron: 'commonjs electron'},
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx", ".node"],
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -82,6 +83,9 @@ const finalWebpackConfig = {
     ],
   },
   plugins: [
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ['**/*', '!database/**', '!view/**'],
+    }),
     new CopyPlugin({
       patterns: [
         { from: "module/capture/iconfont", to: "capture/iconfont" },
@@ -102,7 +106,7 @@ const finalWebpackConfig = {
     }),
     new webpack.DefinePlugin({
       ...global
-    })
+    }),
   ]
 }
 

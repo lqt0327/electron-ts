@@ -4,6 +4,6 @@ declare module 'file-type' {
 
 declare module 'downloadjs';
 
-declare module 'screenCapture' {
+declare module 'screenCapture.node' {
   export function captureScreen(x: number, y: number, width: number, height: number): int;
 }

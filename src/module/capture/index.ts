@@ -2,7 +2,8 @@ import { BrowserWindow, screen, globalShortcut, ipcMain } from 'electron';
 import path from 'path'
 // import Client from './capture.js'
 import { exec } from 'child_process'
-import screenCapture from 'screenCapture'
+const addon = require('./screen_capture.node');
+
 interface OKParams {
   x: number;
   y: number;
@@ -28,7 +29,8 @@ class Capture {
       //   if(err) console.log(err,'???--')
       //   console.log('Greeting1:', response);
       // });
-      screenCapture.captureScreen(0,0,500,500)
+      const res = addon.captureScreen(x,y,width,height)
+      console.log(res,'???;;;;')
       // const p = path.join(CAPTURE_ROOT_PATH, 'demo5')
       // exec(`${p} ${x} ${y} ${width} ${height} ${2}`, function(err, sto) {
       //   console.log(err,'??--', sto)

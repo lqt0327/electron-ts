@@ -1,4 +1,5 @@
-const addon = require('./build/Release/addon.node');
+const addon = require('./build/Release/screen_capture.node');
 
-const res = addon.hello('hello');
-console.log(res,'???>>>')
+// addon.captureScreen('screenshot.png');
+const res = addon.captureScreen(0,0,500,500);
+console.log(res,'------')
