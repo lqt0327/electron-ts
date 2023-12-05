@@ -11,24 +11,18 @@ class CaptureRequest(_message.Message):
     WIDTH_FIELD_NUMBER: _ClassVar[int]
     HEIGHT_FIELD_NUMBER: _ClassVar[int]
     TARGET_FIELD_NUMBER: _ClassVar[int]
-    x: str
-    y: str
-    width: str
-    height: str
+    x: int
+    y: int
+    width: int
+    height: int
     target: str
-    def __init__(self, x: _Optional[str] = ..., y: _Optional[str] = ..., width: _Optional[str] = ..., height: _Optional[str] = ..., target: _Optional[str] = ...) -> None: ...
+    def __init__(self, x: _Optional[int] = ..., y: _Optional[int] = ..., width: _Optional[int] = ..., height: _Optional[int] = ..., target: _Optional[str] = ...) -> None: ...
 
 class CaptureReply(_message.Message):
-    __slots__ = ["x", "y", "width", "height"]
-    X_FIELD_NUMBER: _ClassVar[int]
-    Y_FIELD_NUMBER: _ClassVar[int]
-    WIDTH_FIELD_NUMBER: _ClassVar[int]
-    HEIGHT_FIELD_NUMBER: _ClassVar[int]
-    x: str
-    y: str
-    width: str
-    height: str
-    def __init__(self, x: _Optional[str] = ..., y: _Optional[str] = ..., width: _Optional[str] = ..., height: _Optional[str] = ...) -> None: ...
+    __slots__ = ["file"]
+    FILE_FIELD_NUMBER: _ClassVar[int]
+    file: str
+    def __init__(self, file: _Optional[str] = ...) -> None: ...
 
 class HelloRequest(_message.Message):
     __slots__ = ["name"]

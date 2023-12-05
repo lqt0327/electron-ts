@@ -28,9 +28,9 @@ const finalWebpackConfig = {
       './module/capture/preload.capture.ts'
     ],
   },
-  externals: { electron: 'commonjs electron' },
+  externals: { electron: 'commonjs electron', screenCapture: 'commonjs screenCapture'},
   resolve: {
-    extensions: [".ts", ".tsx", ".js", ".jsx"],
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".node"],
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -51,6 +51,10 @@ const finalWebpackConfig = {
   },
   module: {
     rules: [
+      {
+        test: /\.node$/,
+        use: 'node-loader',
+      },
       {
         test: /\.jsx?$/,
         use: [

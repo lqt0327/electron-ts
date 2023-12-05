@@ -43,11 +43,11 @@ function start() {
                 name: 'electron',
                 cwd: path.join(__dirname, 'dist'),
             },
-            {
-                command: 'node index.js',
-                name: 'python-capture',
-                cwd: path.join(__dirname, 'electron_assets'),
-            }
+            // {
+            //     command: 'node index.js',
+            //     name: 'python-capture',
+            //     cwd: path.join(__dirname, 'electron_assets'),
+            // }
         ],
         {
           prefix: 'name',

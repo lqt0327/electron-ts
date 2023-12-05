@@ -20,8 +20,8 @@ class GreeterStub(object):
                 request_serializer=capture__pb2.HelloRequest.SerializeToString,
                 response_deserializer=capture__pb2.HelloReply.FromString,
                 )
-        self.SayHelloAgain = channel.unary_unary(
-                '/capture.Greeter/SayHelloAgain',
+        self.CaptureDesktop = channel.unary_unary(
+                '/capture.Greeter/CaptureDesktop',
                 request_serializer=capture__pb2.CaptureRequest.SerializeToString,
                 response_deserializer=capture__pb2.CaptureReply.FromString,
                 )
@@ -38,7 +38,7 @@ class GreeterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SayHelloAgain(self, request, context):
+    def CaptureDesktop(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -52,8 +52,8 @@ def add_GreeterServicer_to_server(servicer, server):
                     request_deserializer=capture__pb2.HelloRequest.FromString,
                     response_serializer=capture__pb2.HelloReply.SerializeToString,
             ),
-            'SayHelloAgain': grpc.unary_unary_rpc_method_handler(
-                    servicer.SayHelloAgain,
+            'CaptureDesktop': grpc.unary_unary_rpc_method_handler(
+                    servicer.CaptureDesktop,
                     request_deserializer=capture__pb2.CaptureRequest.FromString,
                     response_serializer=capture__pb2.CaptureReply.SerializeToString,
             ),
@@ -86,7 +86,7 @@ class Greeter(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def SayHelloAgain(request,
+    def CaptureDesktop(request,
             target,
             options=(),
             channel_credentials=None,
@@ -96,7 +96,7 @@ class Greeter(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/capture.Greeter/SayHelloAgain',
+        return grpc.experimental.unary_unary(request, target, '/capture.Greeter/CaptureDesktop',
             capture__pb2.CaptureRequest.SerializeToString,
             capture__pb2.CaptureReply.FromString,
             options, channel_credentials,

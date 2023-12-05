@@ -291,6 +291,11 @@
 
     init({}, (rect) => {
       if (!rect) return;
+      const ok = document.getElementById('js-tool-ok')
+      ok.onclick = () => {
+        const {x, y, width, height} = rect
+        window.electronAPI.captureOk(x,y,width,height)
+      }
       console.log(rect, "???>>>");
     });
   </script>

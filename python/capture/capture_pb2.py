@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcapture.proto\x12\x07\x63\x61pture\"U\n\x0e\x43\x61ptureRequest\x12\t\n\x01x\x18\x01 \x01(\t\x12\t\n\x01y\x18\x02 \x01(\t\x12\r\n\x05width\x18\x03 \x01(\t\x12\x0e\n\x06height\x18\x04 \x01(\t\x12\x0e\n\x06target\x18\x05 \x01(\t\"C\n\x0c\x43\x61ptureReply\x12\t\n\x01x\x18\x01 \x01(\t\x12\t\n\x01y\x18\x02 \x01(\t\x12\r\n\x05width\x18\x03 \x01(\t\x12\x0e\n\x06height\x18\x04 \x01(\t\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1d\n\nHelloReply\x12\x0f\n\x07message\x18\x01 \x01(\t2\x86\x01\n\x07Greeter\x12\x38\n\x08SayHello\x12\x15.capture.HelloRequest\x1a\x13.capture.HelloReply\"\x00\x12\x41\n\rSayHelloAgain\x12\x17.capture.CaptureRequest\x1a\x15.capture.CaptureReply\"\x00\x42\x30\n\x18io.grpc.examples.captureB\x0c\x43\x61ptureProtoP\x01\xa2\x02\x03HLWb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\rcapture.proto\x12\x07\x63\x61pture\"U\n\x0e\x43\x61ptureRequest\x12\t\n\x01x\x18\x01 \x01(\x05\x12\t\n\x01y\x18\x02 \x01(\x05\x12\r\n\x05width\x18\x03 \x01(\x05\x12\x0e\n\x06height\x18\x04 \x01(\x05\x12\x0e\n\x06target\x18\x05 \x01(\t\"\x1c\n\x0c\x43\x61ptureReply\x12\x0c\n\x04\x66ile\x18\x01 \x01(\t\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1d\n\nHelloReply\x12\x0f\n\x07message\x18\x01 \x01(\t2\x87\x01\n\x07Greeter\x12\x38\n\x08SayHello\x12\x15.capture.HelloRequest\x1a\x13.capture.HelloReply\"\x00\x12\x42\n\x0e\x43\x61ptureDesktop\x12\x17.capture.CaptureRequest\x1a\x15.capture.CaptureReply\"\x00\x42\x30\n\x18io.grpc.examples.captureB\x0c\x43\x61ptureProtoP\x01\xa2\x02\x03HLWb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -24,11 +24,11 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_CAPTUREREQUEST']._serialized_start=26
   _globals['_CAPTUREREQUEST']._serialized_end=111
   _globals['_CAPTUREREPLY']._serialized_start=113
-  _globals['_CAPTUREREPLY']._serialized_end=180
-  _globals['_HELLOREQUEST']._serialized_start=182
-  _globals['_HELLOREQUEST']._serialized_end=210
-  _globals['_HELLOREPLY']._serialized_start=212
-  _globals['_HELLOREPLY']._serialized_end=241
-  _globals['_GREETER']._serialized_start=244
-  _globals['_GREETER']._serialized_end=378
+  _globals['_CAPTUREREPLY']._serialized_end=141
+  _globals['_HELLOREQUEST']._serialized_start=143
+  _globals['_HELLOREQUEST']._serialized_end=171
+  _globals['_HELLOREPLY']._serialized_start=173
+  _globals['_HELLOREPLY']._serialized_end=202
+  _globals['_GREETER']._serialized_start=205
+  _globals['_GREETER']._serialized_end=340
 # @@protoc_insertion_point(module_scope)

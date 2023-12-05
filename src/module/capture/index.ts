@@ -1,21 +1,38 @@
 import { BrowserWindow, screen, globalShortcut, ipcMain } from 'electron';
 import path from 'path'
-import Client from './capture.js'
-
+// import Client from './capture.js'
+import { exec } from 'child_process'
+import screenCapture from 'screenCapture'
+interface OKParams {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 class Capture {
   wins: BrowserWindow[];
   constructor() {
     this.wins = []
     
-    ipcMain.handle('test', ()=>{
-      const { x, y } = screen.getCursorScreenPoint()
-      console.log(x,'??>>>----', y)
+    ipcMain.handle('capture-ok', (event, params: OKParams)=>{
+      const point = screen.getCursorScreenPoint()
+      console.log(point,'??>>>----')
+      const d = screen.getDisplayNearestPoint(point)
+      console.log(d,'???nnbbbbb')
+      const {x, y, width, height} = params
       // Client.SayHello({name: 'WORLD'}, function(err, response) {
       //   console.log('Greeting2:', response.message);
       // });
-      // Client.SayHelloAgain({x: x, y: y, width: '400', height: '400', target: `${Date.now()}.png`}, function(err, response) {
+      console.log(x, y, width, height,'???;;;;---', typeof x)
+      // Client.CaptureDesktop({x, y, width, height, target: `${Date.now()}.png`}, function(err, response) {
+      //   if(err) console.log(err,'???--')
       //   console.log('Greeting1:', response);
       // });
+      screenCapture.captureScreen(0,0,500,500)
+      // const p = path.join(CAPTURE_ROOT_PATH, 'demo5')
+      // exec(`${p} ${x} ${y} ${width} ${height} ${2}`, function(err, sto) {
+      //   console.log(err,'??--', sto)
+      // })
       return { x, y }
     })
   }
@@ -48,13 +65,11 @@ class Capture {
       })
       win.loadFile(path.join(CAPTURE_ROOT_PATH, 'capture.html'));
       this.wins.push(win)
-      console.log(this.wins,'+++++')
     }
   }
   close() {
-    ipcMain.removeHandler('test')
+    ipcMain.removeHandler('capture-ok')
     globalShortcut.unregister('Esc')
-    console.log(this.wins,'-----')
     for(let win of this.wins) {
       win.close()
     }

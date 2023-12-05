@@ -17,3 +17,8 @@ pyinstaller --onefile capture.py
 
 ## 文档
 - https://grpc.io/docs/languages/python/quickstart/
+- https://pillow.readthedocs.io/en/stable/reference/ImageGrab.html
+
+## 备注
+- macos上，无法对多屏幕进行截图
+- macos上，图片清晰度较低

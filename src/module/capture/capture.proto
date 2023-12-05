@@ -26,23 +26,20 @@ service Greeter {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
 
-  rpc SayHelloAgain (CaptureRequest) returns (CaptureReply) {}
+  rpc CaptureDesktop (CaptureRequest) returns (CaptureReply) {}
 
 }
 
 message CaptureRequest {
-  string x = 1;
-  string y = 2;
-  string width = 3;
-  string height = 4;
+  int32 x = 1;
+  int32 y = 2;
+  int32 width = 3;
+  int32 height = 4;
   string target = 5;
 }
 
 message CaptureReply {
-    string x = 1;
-    string y = 2;
-    string width = 3;
-    string height = 4;
+    string file = 1;
 }
 
 // The request message containing the user's name.

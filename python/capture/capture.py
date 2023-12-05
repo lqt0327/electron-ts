@@ -22,31 +22,37 @@ import capture_pb2_grpc
 
 from PIL import ImageGrab
 from pathlib import Path
+import os
 
 class Greeter(capture_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
         print('测试数据111')
         return capture_pb2.HelloReply(message="Hello, %s!" % request.name)
     
-    def SayHelloAgain(self, request, context):
-        x = int(request.x)
-        y = int(request.y)
-        width = int(request.width)
-        height = int(request.height)
+    def CaptureDesktop(self, request, context):
+        left = request.x
+        top = request.y
+        width = request.width
+        height = request.height
+        right = left + width
+        bottom = top + height
         tartget = request.target
-        print(x, y, width, height)
-        
+
+        print(left, top, right, bottom,'???[[[]]]')
         current_dir = Path.cwd()
-        print(current_dir)
-        if x == 0 and y == 0 and width == 0 and height == 0:
+        # print(current_dir)
+        if left == 0 and top == 0 and right == 0 and bottom == 0:
             # 获取屏幕尺寸
             width, height = ImageGrab.grab().size
+            right = width
+            bottom = height
         # 截取整个屏幕
-        screenshot = ImageGrab.grab(bbox=(x, y, width, height))
+        screenshot = ImageGrab.grab(bbox=(left, top, right, bottom))
 
         # 保存截图到文件
         screenshot.save(tartget)
-        return capture_pb2.CaptureReply(x=request.x, y=request.y, width=request.width, height=request.height)
+        # file = os.path.join(current_dir, tartget)
+        return capture_pb2.CaptureReply(file=tartget)
 
 def serve():
     port = "50051"
