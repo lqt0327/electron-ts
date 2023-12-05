@@ -37,6 +37,10 @@ class Capture {
       // })
       return { x, y }
     })
+
+    ipcMain.handle('capture-close', (event)=> {
+      this.close()
+    })
   }
   capture() {
     const displays = screen.getAllDisplays()
@@ -71,6 +75,7 @@ class Capture {
   }
   close() {
     ipcMain.removeHandler('capture-ok')
+    ipcMain.removeHandler('capture-close')
     globalShortcut.unregister('Esc')
     for(let win of this.wins) {
       win.close()

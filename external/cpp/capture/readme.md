@@ -1,6 +1,7 @@
 ## 执行命令
 ```
 npm install -g node-gyp
+npm install node-addon-api
 node-gyp configure
 node-gyp build    
 ```
