@@ -1,7 +1,9 @@
 import { BrowserWindow, screen, globalShortcut, ipcMain } from 'electron';
 import path from 'path'
 // import Client from './capture.js'
-import { exec } from 'child_process'
+import fse from 'fs-extra'
+import toast from '../toast/index'
+import WebSocket from 'ws';
 const addon = require('./screen_capture.node');
 
 interface OKParams {
@@ -12,14 +14,16 @@ interface OKParams {
 }
 class Capture {
   wins: BrowserWindow[];
-  constructor() {
+  source: string;
+  constructor({source=""}) {
     this.wins = []
+    this.source = source
     
     ipcMain.handle('capture-ok', (event, params: OKParams)=>{
       const point = screen.getCursorScreenPoint()
       console.log(point,'??>>>----')
       const d = screen.getDisplayNearestPoint(point)
-      console.log(d,'???nnbbbbb')
+      // console.log(d,'???nnbbbbb')
       const {x, y, width, height} = params
       // Client.SayHello({name: 'WORLD'}, function(err, response) {
       //   console.log('Greeting2:', response.message);
@@ -31,10 +35,28 @@ class Capture {
       // });
       const res = addon.captureScreen(x,y,width,height)
       console.log(res,'???;;;;')
-      // const p = path.join(CAPTURE_ROOT_PATH, 'demo5')
-      // exec(`${p} ${x} ${y} ${width} ${height} ${2}`, function(err, sto) {
-      //   console.log(err,'??--', sto)
-      // })
+      if(res.code === 1) {
+        const url = res.url
+        const file = path.join(url, 'screenshot.png')
+        if(fse.existsSync(file)) {
+          const date = this.#formatTime(new Date())
+          const target = path.join(ASSETS_PATH, `${date}.png`)
+          fse.move(file, target, err => {
+            if (err) return console.error(err)
+            console.log('success!')
+          })
+          const result = {
+            code: res.code,
+            url: target,
+          }
+          this.sendMessage(result)
+        }else {
+          console.error('截图异常，未查询到图片文件')
+        }
+        this.close()
+      }else {
+        toast('截图失败！')
+      }
       return { x, y }
     })
 
@@ -49,7 +71,7 @@ class Capture {
       this.close()
     })
 
-    console.log(displays,'displays')
+    // console.log(displays,'displays')
     
     for(let display of displays) {
       let win = new BrowserWindow({
@@ -81,6 +103,35 @@ class Capture {
       win.close()
     }
     this.wins = []
+  }
+  sendMessage(params) {
+    const ws = new WebSocket('ws://localhost:56743/capture');
+
+    ws.on('error', console.error);
+
+    ws.on('open', () => {
+      params.source = this.source
+      console.log(params,'???>>>>')
+      ws.send(JSON.stringify(params));
+    });
+
+    ws.on('message', function message(data) {
+      console.log('received: %s', data);
+    });
+
+    ws.on('close', () => {
+      console.log('客户端已断开连接');
+    });
+  }
+  #formatTime(date: Date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+  
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 }
 

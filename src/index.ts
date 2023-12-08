@@ -8,6 +8,19 @@ import Capture from './module/capture/index'
 import MyDatabase from './database/db'
 import fse from 'fs-extra'
 import path from 'path';
+import WebSocket, { WebSocketServer } from 'ws';
+import express from 'express'
+
+const se = express();
+
+const staticPath = VIEW_PATH;
+// 配置静态文件服务
+se.use(express.static(staticPath));
+
+const port = 54367;
+se.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
 const db = new MyDatabase()
 
@@ -26,6 +39,7 @@ const createWindow = (): void => {
   ipcMain.on('show-context-menu', (event) => showContextMenu(event))
 
   mainWindow.loadFile(path.join(__dirname, 'view/index.html'));
+  // mainWindow.loadURL(`http://localhost:${port}`)
 
   // Open the DevTools.
   mainWindow.webContents.once('dom-ready', () => {
@@ -33,6 +47,8 @@ const createWindow = (): void => {
   });
 
   setApplicationMenu()
+
+  createWebSocketServer()
 
   // globalShortcut.register('Esc', ()=>{
   //   console.log('点击退出')
@@ -111,10 +127,11 @@ app.whenReady().then(()=>{
     return shell.showItemInFolder(link)
   })
 
-  ipcMain.on('screen-capture', (event, data) => {
+  ipcMain.handle('screen-capture', (event) => {
     // console.log('niahdlfahslkdf---', os.platform())
-    const capture = new Capture()
-    capture.capture()
+    // const capture = new Capture()
+    // capture.capture()
+    return true
   })
 
   ipcMain.handle('db:createTable', (event, tableName)=>{
@@ -198,3 +215,52 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+function createWebSocketServer() {
+  const wss = new WebSocketServer({ port: 56743});
+  const clients = new Map();
+  wss.on('connection', (ws, req) => {
+    const url = req.url;
+    console.log('客户端已连接', url);
+    ws.on('message', (message)=>{
+      const data = JSON.parse(message)
+      if (data.clientId) {
+        clients.set(data.clientId, ws);
+      }
+      ws.send('初始化完成')
+    })
+
+    const map = {
+      '/capture': () => {
+        ws.on('message', (data, isBinary) => {
+          const client = clients.get('capture_view');
+          if (client) {
+            console.log(JSON.parse(data),'???----')
+            client.send(data,{ binary: isBinary });
+          }
+        })
+      },
+      '/capture_view': () => {
+        ws.on('message', (message, isBinary) => {
+          const { data } = JSON.parse(message)
+          const source = data?.source || ""
+          console.log(source,'???---yyy',data)
+          if(source) {
+            const capture = new Capture({source: source})
+            capture.capture()
+          }
+        })
+      },
+      'default': () => {
+
+      }
+    }
+
+    typeof map[url] === 'function' ? map[url]() : map['default']()
+
+    ws.on('close', () => {
+      console.log('客户端已断开连接');
+    });
+  });
+  return wss;
+}

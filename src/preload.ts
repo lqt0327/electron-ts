@@ -10,7 +10,7 @@ window.addEventListener('contextmenu', (e) => {
 })
 
 window.addEventListener('click', () => {
-  ipcRenderer.send('screen-capture')
+  // ipcRenderer.invoke('screen-capture')
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -59,9 +59,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       result: data
     }
   },
-  captureImage() {
-    
-  },
+  capture: () => ipcRenderer.invoke('screen-capture'),
   selectImage: () => ipcRenderer.invoke('dialog:selectImage'),
   selectFile: () => ipcRenderer.invoke('dialog:selectFile'),
   pathBasename: (pathname: string, ext?: string) => ipcRenderer.invoke('tools:pathBasename', pathname, ext),

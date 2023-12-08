@@ -105,7 +105,7 @@ napi_value CaptureScreenWrapper(napi_env env, napi_callback_info info) {
     
     CGRect rect = CGRectMake(x, y, width, height);
     // 调用截图函数
-    int result = captureScreen(displays[targetScreenIndex], rect);
+    int result = captureScreen(targetScreenIndex, rect);
     // int result = 1;
     // napi_value resultValue;
     // napi_create_int32(env, result, &resultValue);

@@ -2,6 +2,8 @@ declare const QUICK_LINK_DATA_PATH: string;
 declare const TOAST_ROOR_PATH: string;
 declare const CAPTURE_ROOT_PATH: string;
 declare const PYTHON_PATH: string;
+declare const ASSETS_PATH: string;
+declare const VIEW_PATH: string;
 
 interface QuickLinkData {
   [key: string]: {
