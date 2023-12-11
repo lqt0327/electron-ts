@@ -22,3 +22,4 @@ pyinstaller --onefile capture.py
 ## 备注
 - macos上，无法对多屏幕进行截图
 - macos上，图片清晰度较低
+- 服务启动较慢，要个4、5秒
