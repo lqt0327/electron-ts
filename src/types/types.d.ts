@@ -33,7 +33,8 @@ interface FileMessage {
   fName: string,
   cTime: Date,
   mTime: Date,
-  content?: JSON
+  content?: JSON,
+  url?: string,
 }
 
 interface OptionData {

@@ -16,5 +16,13 @@ module.exports = {
       watch_delay: 1000,
       ignore_watch : ["*/**/*.d.ts"],
     },
+    {
+      name   : "llscw_assets",
+      script : "start-assets.js",
+      exec_mode: "cluster",
+      watch: ["./electron_assets"],
+      watch_delay: 1000,
+      ignore_watch : ["*/**/*.js","*/**/*.json"],
+    },
   ]
 }

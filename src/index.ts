@@ -3,7 +3,7 @@ import { showContextMenu, setApplicationMenu } from './option';
 import DialogController from './controllers/dialog.controller';
 import DataController from './controllers/data.controller';
 import FileController from './controllers/file.controller';
-import { encodeById, pathJoin, pathBasename, pathDirname } from './utils/tool';
+import { encodeById, pathJoin, pathBasename, pathDirname, formatTime } from './utils/tool';
 import Capture from './module/capture/index'
 import MyDatabase from './database/db'
 import fse from 'fs-extra'
@@ -60,6 +60,23 @@ app.whenReady().then(()=>{
   ipcMain.handle('dialog:selectImage', async ()=>{
     const dialog = new DialogController(['multiSelections', 'openFile'])
     let file = await dialog.handleFileOpen('image', 'file')
+    /**quill不支持file协议图片，增加http支持 */
+    if(file.result) {
+      const src = (file.result as FileMessage).path
+      const date = formatTime(new Date())
+      const ext = path.extname(src)
+      const fName = date+ext
+      const dest = path.join(ASSETS_PATH, 'images', fName)
+      fse.copySync(src, dest)
+      file.result = {
+        path: dest,
+        fName,
+        cTime: fse.statSync(dest).ctime,
+        mTime: fse.statSync(dest).mtime,
+        url: `http://localhost:38435/${fName}`
+      }
+    }
+    /**quill不支持file协议图片，增加http支持 */
     return file
   })
 

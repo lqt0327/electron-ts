@@ -1,6 +1,11 @@
 module.exports = {
   packagerConfig: {
-    
+    // extraResources: [
+    //   {
+    //     from: "./electron_assets",
+    //     to: "electron_assets"
+    //   }
+    // ]
   },
   rebuildConfig: {
 
