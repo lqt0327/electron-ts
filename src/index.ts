@@ -11,6 +11,8 @@ import path from 'path';
 import WebSocket, { WebSocketServer } from 'ws';
 import express from 'express'
 
+let wss;
+
 const se = express();
 
 const staticPath = VIEW_PATH;
@@ -228,13 +230,22 @@ app.whenReady().then(()=>{
 })
 
 app.on('window-all-closed', () => {
+  if(wss) {
+    wss.close((err) => {
+      if (err) {
+        console.error('关闭服务器时发生错误:', err);
+      } else {
+        console.log(`端口 56743 已关闭`);
+      }
+    });
+  }
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 function createWebSocketServer() {
-  const wss = new WebSocketServer({ port: 56743});
+  wss = new WebSocketServer({ port: 56743});
   const clients = new Map();
   wss.on('connection', (ws, req) => {
     const url = req.url;
