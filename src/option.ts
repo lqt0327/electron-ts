@@ -63,7 +63,7 @@ function setApplicationMenu() {
         { role: 'zoomIn', label: '放大' },
         { role: 'zoomOut', label: '缩小' },
         { type: 'separator' },
-        { role: 'togglefullscreen', label: '全屏' }
+        { role: 'togglefullscreen', label: '全屏' },
       ]
     },
     {
@@ -83,7 +83,8 @@ function setApplicationMenu() {
             clipboard.writeText('123456789')
             toast('复制成功')
           }
-        }
+        },
+        { role: 'toggleDevTools', label: '切换开发人员工具'}
       ]
     }
   ]
